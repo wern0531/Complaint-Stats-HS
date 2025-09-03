@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   
   // 全域 CSS
   css: [
-    './styles/tailwind.css'
+    '~/styles/tailwind.css'
   ],
   
   // PostCSS 設定
