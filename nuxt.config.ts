@@ -20,12 +20,6 @@ export default defineNuxtConfig({
     }
   },
 
-  // TypeScript 設定
-  typescript: {
-    strict: true,
-    typeCheck: false  // 暫時關閉 TypeScript 檢查以避免啟動問題
-  },
-
   // SSR 設定
   ssr: true,
 
