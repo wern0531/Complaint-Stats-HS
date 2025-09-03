@@ -1,5 +1,6 @@
 import type { Complaint } from '~/types/complaint'
-// import realComplaints from '~/server/data/realComplaints.json'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 // 網購平台關鍵字識別
 const ONLINE_PLATFORM_KEYWORDS = [
@@ -34,8 +35,10 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   
   try {
-    // 讀取 public 目錄下的 realComplaints.json
-    const realComplaints: Complaint[] = await $fetch('http://localhost:3000/realComplaints.json')
+    // 用 fs 讀取 public 目錄下的 realComplaints.json
+    const filePath = join(process.cwd(), 'public', 'realComplaints.json')
+    const fileContent = readFileSync(filePath, 'utf-8')
+    const realComplaints: Complaint[] = JSON.parse(fileContent)
     
     // 年份+月份篩選邏輯
     if (query.yearMonth) {

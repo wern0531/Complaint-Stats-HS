@@ -1,12 +1,15 @@
 import type { Complaint, ComplaintFilter } from '~/types/complaint'
-// import realComplaints from '~/server/data/realComplaints.json'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event)
     
-    // 讀取 public 目錄下的 realComplaints.json
-    const realComplaints: Complaint[] = await $fetch('http://localhost:3000/realComplaints.json')
+    // 用 fs 讀取 public 目錄下的 realComplaints.json
+    const filePath = join(process.cwd(), 'public', 'realComplaints.json')
+    const fileContent = readFileSync(filePath, 'utf-8')
+    const realComplaints: Complaint[] = JSON.parse(fileContent)
     
     // 解析篩選參數
     const filters: ComplaintFilter = {
