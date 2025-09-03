@@ -1,5 +1,5 @@
 import type { Complaint } from '~/types/complaint'
-import realComplaints from '~/server/data/realComplaints.json'
+// import realComplaints from '~/server/data/realComplaints.json'
 
 // 網購平台關鍵字識別
 const ONLINE_PLATFORM_KEYWORDS = [
@@ -34,7 +34,8 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   
   try {
-    let complaints = realComplaints
+    // 讀取 public 目錄下的 realComplaints.json
+    const realComplaints: Complaint[] = await $fetch('http://localhost:3000/realComplaints.json')
     
     // 年份+月份篩選邏輯
     if (query.yearMonth) {
