@@ -593,10 +593,12 @@ import {
   transformStatusStatsToPieChart
 } from '~/utils/chartDataTransformer'
 
-// SEO 設定 - 使用 useServerSeoMeta 替代 useHead
-useServerSeoMeta({
+// SEO 設定 - SPA 模式下使用 useHead
+useHead({
   title: '客訴統計搜尋工具',
-  description: '客訴資料統計與搜尋管理系統'
+  meta: [
+    { name: 'description', content: '客訴資料統計與搜尋管理系統' }
+  ]
 })
 
 // 響應式資料
@@ -680,8 +682,6 @@ const statusChartData = computed(() => {
 
 // 使用 TaiwanBeez 和備用地圖的縣市位置座標
 const cityMapLocalData = computed(() => {
-  // 在 SSR 期間直接返回空陣列
-  if (!process.client) return []
   if (!statsData.value?.cityStats || !Array.isArray(statsData.value.cityStats)) return []
   
   // TaiwanBeez 地圖的縣市位置（以百分比表示）
@@ -740,7 +740,7 @@ const cityMapLocalData = computed(() => {
   // 避免在 SSR 期間訪問 mapLoaded.value
   let cityPositions = svgPositions
   try {
-    if (process.client && mapLoaded && mapLoaded.value) {
+    if (mapLoaded && mapLoaded.value) {
       cityPositions = taiwanBeezPositions
     }
   } catch (error) {
@@ -759,8 +759,6 @@ const cityMapLocalData = computed(() => {
 
 // 箭頭線條和標籤位置數據
 const cityMapArrowData = computed(() => {
-  // 在 SSR 期間直接返回空陣列
-  if (!process.client) return []
   if (!statsData.value?.cityStats || !Array.isArray(statsData.value.cityStats) || !cityMapLocalData.value || !Array.isArray(cityMapLocalData.value) || cityMapLocalData.value.length === 0) return []
   
   // 標籤框位置配置（地圖外圍分層排列）
@@ -822,8 +820,6 @@ const cityMapArrowData = computed(() => {
 
 // 使用真實台灣地圖圖片的縣市位置座標（百分比）
 const cityMapImageData = computed(() => {
-  // 在 SSR 期間直接返回空陣列
-  if (!process.client) return []
   if (!statsData.value?.cityStats || !Array.isArray(statsData.value.cityStats)) return []
   
   // 根據真實台灣地圖圖片的縣市位置（以百分比表示）
@@ -862,8 +858,6 @@ const cityMapImageData = computed(() => {
 })
 
 const cityMapData = computed(() => {
-  // 在 SSR 期間直接返回空陣列
-  if (!process.client) return []
   if (!statsData.value?.cityStats || !Array.isArray(statsData.value.cityStats)) return []
   
   const cityPositions = {
@@ -1093,12 +1087,10 @@ watch(showStatsModal, async (newValue) => {
 
 // 初始載入
 onMounted(() => {
-  if (process.client) {
-    try {
-      handleSearch({})
-    } catch (error) {
-      console.error('初始化載入失敗:', error)
-    }
+  try {
+    handleSearch({})
+  } catch (error) {
+    console.error('初始化載入失敗:', error)
   }
 })
 </script>

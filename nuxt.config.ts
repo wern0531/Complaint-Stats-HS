@@ -22,8 +22,8 @@ export default defineNuxtConfig({
     }
   },
 
-  // SSR 設定
-  ssr: true,
+  // SSR 設定 - 改為 SPA 模式避免 SSR 問題
+  ssr: false,
 
   // 元資料設定
   app: {

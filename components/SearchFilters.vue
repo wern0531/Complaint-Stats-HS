@@ -220,9 +220,7 @@ const handleSearch = () => {
 
 // 組件掛載時
 onMounted(() => {
-  if (process.client) {
-    // 客戶端初始化邏輯
-  }
+  // 客戶端初始化邏輯
 })
 </script>
 
