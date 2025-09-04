@@ -1,5 +1,5 @@
 import type { Complaint } from '~/types/complaint'
-import realComplaints from '~/server/data/realComplaints.json'
+import realComplaints from '~/server/data/realComplaints_test.json'
 
 // 網購平台關鍵字識別
 const ONLINE_PLATFORM_KEYWORDS = [

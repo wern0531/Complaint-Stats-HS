@@ -1,5 +1,5 @@
 import type { Complaint, ComplaintFilter } from '~/types/complaint'
-import realComplaints from '~/server/data/realComplaints.json'
+import realComplaints from '~/server/data/realComplaints_test.json'
 
 export default defineEventHandler(async (event) => {
   try {
