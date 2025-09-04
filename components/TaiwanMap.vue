@@ -205,7 +205,7 @@ const getCountColor = (count: number) => {
 const fetchCityStats = async () => {
   try {
     loading.value = true
-    const response = await $fetch('/api/complaints/stats')
+    const response = await fetch('/api/complaints/stats').then(res => res.json())
     if (response.success && response.data) {
       cityStats.value = response.data.cityStats || []
     }
@@ -261,6 +261,7 @@ const resetCoordinates = () => {
 
 // 儲存座標到 localStorage
 const saveCoordinates = () => {
+  if (!process.client) return
   try {
     localStorage.setItem('taiwan-map-coordinates', JSON.stringify(cityCoordinates.value))
     alert('座標已儲存！')
@@ -272,6 +273,7 @@ const saveCoordinates = () => {
 
 // 從 localStorage 載入座標
 const loadCoordinates = () => {
+  if (!process.client) return
   try {
     const saved = localStorage.getItem('taiwan-map-coordinates')
     if (saved) {

@@ -89,19 +89,23 @@ const createChart = () => {
 
 // 監聽數據變化
 watch(() => props.data, () => {
-  nextTick(() => {
-    createChart()
-  })
+  if (process.client) {
+    nextTick(() => {
+      createChart()
+    })
+  }
 }, { deep: true })
 
 // 組件掛載時創建圖表
 onMounted(() => {
-  createChart()
+  if (process.client) {
+    createChart()
+  }
 })
 
 // 組件卸載時清理
 onUnmounted(() => {
-  if (chart) {
+  if (process.client && chart) {
     chart.destroy()
   }
 })

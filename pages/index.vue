@@ -904,9 +904,8 @@ const cityMapData = computed(() => {
 const handleSearch = async (filters: any) => {
   loading.value = true
   try {
-    const response = await $fetch('/api/complaints/list', {
-      params: filters
-    }) as any
+    const queryString = new URLSearchParams(filters).toString()
+    const response = await fetch(`/api/complaints/list?${queryString}`).then(res => res.json())
     
     if (response.success) {
       complaints.value = response.data?.complaints || []
@@ -926,10 +925,13 @@ const handleSubmit = async (data: Partial<Complaint>) => {
     const url = isEdit ? `/api/complaints/${editData.value?._id}` : '/api/complaints/add'
     const method = isEdit ? 'PUT' : 'POST'
     
-    const response = await $fetch(url, {
+    const response = await fetch(url, {
       method,
-      body: data
-    }) as any
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }).then(res => res.json())
     
     if (response.success) {
       // 重新載入資料
@@ -985,7 +987,8 @@ const updateStats = async () => {
     }
     // 如果 selectedPeriod.value === 'all'，不傳遞 month 參數
     
-    const response = await $fetch('/api/complaints/stats', { params }) as any
+    const queryString = new URLSearchParams(params).toString()
+    const response = await fetch(`/api/complaints/stats?${queryString}`).then(res => res.json())
     if (response.success) {
       statsData.value = response.data
     }
