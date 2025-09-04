@@ -1,9 +1,14 @@
 import type { Complaint, ComplaintFilter } from '~/types/complaint'
-import { mockData } from '~/server/data/mockData'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 
 export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event)
+    
+    // 動態讀取 mockData JSON 檔案
+    const mockDataPath = resolve(process.cwd(), 'server/data/mockData.json')
+    const mockData: Complaint[] = JSON.parse(readFileSync(mockDataPath, 'utf-8'))
     
     // 解析篩選參數
     const filters: ComplaintFilter = {
