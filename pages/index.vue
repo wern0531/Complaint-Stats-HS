@@ -368,7 +368,7 @@
                       <!-- 使用 TaiwanBeez 的台灣地圖 -->
                       <div class="relative">
                         <img 
-                          src="http://www.taiwanbeez.com/images/taiwanmap.png"
+                          src="/taiwan-map-real.png.jpg"
                           alt="台灣地圖"
                           class="w-96 h-auto border border-gray-200 rounded bg-white"
                           @error="handleImageError"
@@ -486,7 +486,7 @@
                   <div class="mt-4 text-center text-sm text-gray-600">
                     <div>點擊地圖上的圓點查看各縣市詳細資訊</div>
                     <div class="mt-2 text-xs text-gray-500">
-                      地圖來源：<a href="http://www.taiwanbeez.com/info/map.htm" target="_blank" class="text-blue-600 hover:underline">TaiwanBeez 台灣地圖</a>
+                      地圖來源：本地圖片資源
                     </div>
                   </div>
                 </div>
@@ -1055,7 +1055,7 @@ const showCityDetail = (cityName: string) => {
 }
 
 const handleImageError = (event: Event) => {
-  console.log('TaiwanBeez 圖片載入失敗，使用備用 SVG 地圖')
+  console.log('台灣地圖圖片載入失敗，使用備用 SVG 地圖')
   const img = event.target as HTMLImageElement
   if (img) {
     img.style.display = 'none'
@@ -1069,7 +1069,7 @@ const handleImageError = (event: Event) => {
 }
 
 const handleImageLoad = () => {
-  console.log('TaiwanBeez 圖片載入成功')
+  console.log('台灣地圖圖片載入成功')
   mapLoaded.value = true
 }
 
