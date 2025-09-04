@@ -368,7 +368,7 @@
                       <!-- 使用 TaiwanBeez 的台灣地圖 -->
                       <div class="relative">
                         <img 
-                          src="/taiwan-map-real.png.jpg"
+                          src="/taiwan-map-real.jpg"
                           alt="台灣地圖"
                           class="w-96 h-auto border border-gray-200 rounded bg-white"
                           @error="handleImageError"
