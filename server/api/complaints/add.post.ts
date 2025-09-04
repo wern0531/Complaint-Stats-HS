@@ -1,14 +1,12 @@
 import type { Complaint } from '~/types/complaint'
-import { writeFileSync, readFileSync } from 'fs'
-import { resolve } from 'path'
+import { mockData } from '~/server/data/mockData'
 
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
     
-    // 動態讀取 JSON 檔案
-    const filePath = resolve(process.cwd(), 'server/data/realComplaints.json')
-    const realComplaints: Complaint[] = JSON.parse(readFileSync(filePath, 'utf-8'))
+    // 使用 mockData 作為資料來源
+    let realComplaints = [...mockData] as Complaint[]
     
     // 驗證必填欄位
     if (!body.complaintNumber || !body.productItem || !body.consumerReactionPoint) {
@@ -63,14 +61,8 @@ export default defineEventHandler(async (event) => {
     // 添加到數據中
     realComplaints.push(newComplaint)
     
-    // 保存到文件（在實際生產環境中應該使用數據庫）
-    try {
-      const filePath = resolve(process.cwd(), 'server/data/realComplaints.json')
-      writeFileSync(filePath, JSON.stringify(realComplaints, null, 2), 'utf-8')
-    } catch (writeError) {
-      console.error('寫入文件失敗:', writeError)
-      // 即使寫入失敗，我們仍然返回成功，因為數據已經添加到內存中
-    }
+    // 注意：在 serverless 環境中，無法持久化保存資料
+    // 這裡只是模擬新增功能，實際生產環境應該使用數據庫
     
     return {
       success: true,

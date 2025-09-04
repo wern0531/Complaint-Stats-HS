@@ -1,14 +1,12 @@
 import type { Complaint, ComplaintFilter } from '~/types/complaint'
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import { mockData } from '~/server/data/mockData'
 
 export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event)
     
-    // 動態讀取 mockData JSON 檔案
-    const mockDataPath = resolve(process.cwd(), 'server/data/mockData.json')
-    const mockData: Complaint[] = JSON.parse(readFileSync(mockDataPath, 'utf-8'))
+    // 使用 mockData 作為資料來源
+    const mockDataArray = [...mockData] as Complaint[]
     
     // 解析篩選參數
     const filters: ComplaintFilter = {
@@ -25,7 +23,7 @@ export default defineEventHandler(async (event) => {
     }
     
     // 篩選資料
-    let filteredComplaints = [...mockData] as Complaint[]
+    let filteredComplaints = [...mockDataArray] as Complaint[]
     
     // 月份篩選
     if (filters.month) {
