@@ -593,12 +593,10 @@ import {
   transformStatusStatsToPieChart
 } from '~/utils/chartDataTransformer'
 
-// SEO 設定
-useHead({
+// SEO 設定 - 使用 useServerSeoMeta 替代 useHead
+useServerSeoMeta({
   title: '客訴統計搜尋工具',
-  meta: [
-    { name: 'description', content: '客訴資料統計與搜尋管理系統' }
-  ]
+  description: '客訴資料統計與搜尋管理系統'
 })
 
 // 響應式資料
