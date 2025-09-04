@@ -1,5 +1,6 @@
 import type { Complaint } from '~/types/complaint'
-import realComplaints from '~/server/data/realComplaints.json'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 
 // 網購平台關鍵字識別
 const ONLINE_PLATFORM_KEYWORDS = [
@@ -34,6 +35,9 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   
   try {
+    // 動態讀取 JSON 檔案
+    const filePath = resolve(process.cwd(), 'server/data/realComplaints.json')
+    const realComplaints: Complaint[] = JSON.parse(readFileSync(filePath, 'utf-8'))
     let complaints = realComplaints
     
     // 年份+月份篩選邏輯

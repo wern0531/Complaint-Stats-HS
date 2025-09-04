@@ -1,11 +1,14 @@
 import type { Complaint } from '~/types/complaint'
-import realComplaints from '~/server/data/realComplaints.json'
-import { writeFileSync } from 'fs'
+import { writeFileSync, readFileSync } from 'fs'
 import { resolve } from 'path'
 
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
+    
+    // 動態讀取 JSON 檔案
+    const filePath = resolve(process.cwd(), 'server/data/realComplaints.json')
+    const realComplaints: Complaint[] = JSON.parse(readFileSync(filePath, 'utf-8'))
     
     // 驗證必填欄位
     if (!body.complaintNumber || !body.productItem || !body.consumerReactionPoint) {
