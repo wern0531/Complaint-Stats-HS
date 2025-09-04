@@ -1,5 +1,5 @@
 import type { Complaint, ComplaintFilter } from '~/types/complaint'
-import realComplaints from '~/server/data/realComplaints_test.json'
+import { mockData } from '~/server/data/mockData'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     }
     
     // 篩選資料
-    let filteredComplaints = [...realComplaints] as Complaint[]
+    let filteredComplaints = [...mockData] as Complaint[]
     
     // 月份篩選
     if (filters.month) {

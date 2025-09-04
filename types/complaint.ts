@@ -24,8 +24,8 @@ export interface Complaint {
   complaintQuantity?: number;        // 客訴件數
   complaintPercentage?: number;      // 百分比.1
   cumulativePercentage?: number;     // 累計百分比
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // 客訴統計數據
