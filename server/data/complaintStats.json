@@ -1,0 +1,1255 @@
+{
+  "total": 360,
+  "cityStats": [
+    {
+      "city": "新北",
+      "count": 59
+    },
+    {
+      "city": "台中",
+      "count": 43
+    },
+    {
+      "city": "桃園",
+      "count": 40
+    },
+    {
+      "city": "高雄",
+      "count": 39
+    },
+    {
+      "city": "未知",
+      "count": 39
+    },
+    {
+      "city": "台北",
+      "count": 34
+    },
+    {
+      "city": "台南",
+      "count": 31
+    },
+    {
+      "city": "新竹",
+      "count": 12
+    },
+    {
+      "city": "彰化",
+      "count": 10
+    },
+    {
+      "city": "宜蘭",
+      "count": 10
+    },
+    {
+      "city": "屏東",
+      "count": 9
+    },
+    {
+      "city": "嘉義",
+      "count": 8
+    },
+    {
+      "city": "澎湖",
+      "count": 6
+    },
+    {
+      "city": "南投",
+      "count": 5
+    },
+    {
+      "city": "基隆",
+      "count": 4
+    },
+    {
+      "city": "苗栗",
+      "count": 3
+    },
+    {
+      "city": "花蓮",
+      "count": 3
+    },
+    {
+      "city": "雲林",
+      "count": 2
+    },
+    {
+      "city": "台東",
+      "count": 1
+    },
+    {
+      "city": "臺南",
+      "count": 1
+    },
+    {
+      "city": "金門",
+      "count": 1
+    }
+  ],
+  "productStats": [
+    {
+      "product": "PKL330 立頓原味奶茶",
+      "count": 105
+    },
+    {
+      "product": "PKL300 立頓原味奶茶",
+      "count": 79
+    },
+    {
+      "product": "PKL250 立頓原味奶茶6入",
+      "count": 59
+    },
+    {
+      "product": "PKL250 立頓原味奶茶",
+      "count": 58
+    },
+    {
+      "product": "PKL300 立頓原味奶茶6入",
+      "count": 48
+    },
+    {
+      "product": "PKL330 立頓原味奶茶6入",
+      "count": 7
+    },
+    {
+      "product": "PKL300 立頓草莓奶茶",
+      "count": 2
+    },
+    {
+      "product": "PKL250 立頓鮮漾奶綠",
+      "count": 1
+    },
+    {
+      "product": "PKL250 立頓巧克力奶茶",
+      "count": 1
+    }
+  ],
+  "machineStats": [
+    {
+      "machine": "P#15",
+      "count": 360
+    }
+  ],
+  "channelStats": [
+    {
+      "channel": "未知",
+      "count": 62
+    },
+    {
+      "channel": "-",
+      "count": 31
+    },
+    {
+      "channel": "全聯",
+      "count": 29
+    },
+    {
+      "channel": "家樂福",
+      "count": 17
+    },
+    {
+      "channel": "7-11",
+      "count": 9
+    },
+    {
+      "channel": "全家",
+      "count": 7
+    },
+    {
+      "channel": "萊爾富",
+      "count": 7
+    },
+    {
+      "channel": "大潤發",
+      "count": 6
+    },
+    {
+      "channel": "酷澎",
+      "count": 3
+    },
+    {
+      "channel": "愛買",
+      "count": 3
+    },
+    {
+      "channel": "自販機",
+      "count": 3
+    },
+    {
+      "channel": "大賣場",
+      "count": 3
+    },
+    {
+      "channel": "pchome",
+      "count": 3
+    },
+    {
+      "channel": "頂好",
+      "count": 3
+    },
+    {
+      "channel": "屏東7-11",
+      "count": 2
+    },
+    {
+      "channel": "販賣機",
+      "count": 2
+    },
+    {
+      "channel": "momo",
+      "count": 2
+    },
+    {
+      "channel": "家樂福仁德店",
+      "count": 2
+    },
+    {
+      "channel": "超市",
+      "count": 2
+    },
+    {
+      "channel": "自動販賣機",
+      "count": 2
+    },
+    {
+      "channel": "大買家",
+      "count": 2
+    },
+    {
+      "channel": "中盤商",
+      "count": 2
+    },
+    {
+      "channel": "7-11金山門市",
+      "count": 2
+    },
+    {
+      "channel": "蔡公堂批發商",
+      "count": 1
+    },
+    {
+      "channel": "合作社",
+      "count": 1
+    },
+    {
+      "channel": "7-11德力門市",
+      "count": 1
+    },
+    {
+      "channel": "自由聯盟超市",
+      "count": 1
+    },
+    {
+      "channel": "uber超商",
+      "count": 1
+    },
+    {
+      "channel": "7-11錚嬡門市",
+      "count": 1
+    },
+    {
+      "channel": "職訓中心販賣部",
+      "count": 1
+    },
+    {
+      "channel": "台南火車站自販機",
+      "count": 1
+    },
+    {
+      "channel": "酷膨",
+      "count": 1
+    },
+    {
+      "channel": "西屯區的批發商",
+      "count": 1
+    },
+    {
+      "channel": "ok超商",
+      "count": 1
+    },
+    {
+      "channel": "歸仁超商",
+      "count": 1
+    },
+    {
+      "channel": "三峽區研究經銷商",
+      "count": 1
+    },
+    {
+      "channel": "MOMO",
+      "count": 1
+    },
+    {
+      "channel": "嘉義市菸酒專賣店",
+      "count": 1
+    },
+    {
+      "channel": "富市多",
+      "count": 1
+    },
+    {
+      "channel": "輕鬆購五金百貨新中店",
+      "count": 1
+    },
+    {
+      "channel": "全聯高雄自強店",
+      "count": 1
+    },
+    {
+      "channel": "顏先生",
+      "count": 1
+    },
+    {
+      "channel": "旗津雜貨店",
+      "count": 1
+    },
+    {
+      "channel": "原昌行",
+      "count": 1
+    },
+    {
+      "channel": "蝦皮商城",
+      "count": 1
+    },
+    {
+      "channel": "線上家樂福",
+      "count": 1
+    },
+    {
+      "channel": "愛買超市或者全聯",
+      "count": 1
+    },
+    {
+      "channel": "大統生鮮超市",
+      "count": 1
+    },
+    {
+      "channel": "酷彭",
+      "count": 1
+    },
+    {
+      "channel": "煙酒批發商",
+      "count": 1
+    },
+    {
+      "channel": "全聯九德或長春店",
+      "count": 1
+    },
+    {
+      "channel": "7-11天虹門市",
+      "count": 1
+    },
+    {
+      "channel": "  uber家樂福南屯",
+      "count": 1
+    },
+    {
+      "channel": "熊貓超市中正店",
+      "count": 1
+    },
+    {
+      "channel": "南投市某一家五金商店",
+      "count": 1
+    },
+    {
+      "channel": "  台中雜貨店",
+      "count": 1
+    },
+    {
+      "channel": "7-11貴族門市",
+      "count": 1
+    },
+    {
+      "channel": "麒麟麵店",
+      "count": 1
+    },
+    {
+      "channel": "全家便利店",
+      "count": 1
+    },
+    {
+      "channel": "酷鵬",
+      "count": 1
+    },
+    {
+      "channel": "小北百貨左營新莊店",
+      "count": 1
+    },
+    {
+      "channel": "中盤進貨",
+      "count": 1
+    },
+    {
+      "channel": "小北百貨",
+      "count": 1
+    },
+    {
+      "channel": "7-11朝陽大學門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11 強鹿店",
+      "count": 1
+    },
+    {
+      "channel": "全家-三重區",
+      "count": 1
+    },
+    {
+      "channel": "全家-大安店",
+      "count": 1
+    },
+    {
+      "channel": "美廉社板橋宏國店",
+      "count": 1
+    },
+    {
+      "channel": "楓康超市",
+      "count": 1
+    },
+    {
+      "channel": "苗栗農工",
+      "count": 1
+    },
+    {
+      "channel": "仁德區全聯",
+      "count": 1
+    },
+    {
+      "channel": "大潤發土城店",
+      "count": 1
+    },
+    {
+      "channel": "萬得行零售店",
+      "count": 1
+    },
+    {
+      "channel": "全家新店景大店",
+      "count": 1
+    },
+    {
+      "channel": "台糖門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11西門門市",
+      "count": 1
+    },
+    {
+      "channel": "萊爾富高市鎮港店",
+      "count": 1
+    },
+    {
+      "channel": "五金大賣場",
+      "count": 1
+    },
+    {
+      "channel": "全家新莊副都店",
+      "count": 1
+    },
+    {
+      "channel": "家樂福內湖店",
+      "count": 1
+    },
+    {
+      "channel": "量販店",
+      "count": 1
+    },
+    {
+      "channel": "雜貨店",
+      "count": 1
+    },
+    {
+      "channel": "五金超市",
+      "count": 1
+    },
+    {
+      "channel": "好璟商店",
+      "count": 1
+    },
+    {
+      "channel": "吳小姐",
+      "count": 1
+    },
+    {
+      "channel": "英才便利商店",
+      "count": 1
+    },
+    {
+      "channel": "全家台南永福店",
+      "count": 1
+    },
+    {
+      "channel": "加賀屋超市",
+      "count": 1
+    },
+    {
+      "channel": "酷彭APP",
+      "count": 1
+    },
+    {
+      "channel": "7-11統棒門市",
+      "count": 1
+    },
+    {
+      "channel": "全家嘉義新東義店",
+      "count": 1
+    },
+    {
+      "channel": "桃園市家樂福",
+      "count": 1
+    },
+    {
+      "channel": "台中全聯福星店",
+      "count": 1
+    },
+    {
+      "channel": "虎尾家樂福",
+      "count": 1
+    },
+    {
+      "channel": "7-11暨大門市",
+      "count": 1
+    },
+    {
+      "channel": "全家台南大豐店",
+      "count": 1
+    },
+    {
+      "channel": "全聯泰山明志店",
+      "count": 1
+    },
+    {
+      "channel": "桃園高中福利社",
+      "count": 1
+    },
+    {
+      "channel": "全聯岡山店",
+      "count": 1
+    },
+    {
+      "channel": "家樂福德安店",
+      "count": 1
+    },
+    {
+      "channel": "全家-宜居門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11開寧門市",
+      "count": 1
+    },
+    {
+      "channel": "樂多福麵包店",
+      "count": 1
+    },
+    {
+      "channel": "7-11久昌門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11 億承門市",
+      "count": 1
+    },
+    {
+      "channel": "進鑫",
+      "count": 1
+    },
+    {
+      "channel": "蝦皮",
+      "count": 1
+    },
+    {
+      "channel": "嘉義中埔大久久",
+      "count": 1
+    },
+    {
+      "channel": "彰化家樂福",
+      "count": 1
+    },
+    {
+      "channel": "全家鑫都店",
+      "count": 1
+    },
+    {
+      "channel": "全家新建門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11大灣門市",
+      "count": 1
+    },
+    {
+      "channel": "台中高工販賣部",
+      "count": 1
+    },
+    {
+      "channel": "7-11天越門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11竹圍門市",
+      "count": 1
+    },
+    {
+      "channel": "永隆商行",
+      "count": 1
+    },
+    {
+      "channel": "7-11華耀門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11揚揚門市",
+      "count": 1
+    },
+    {
+      "channel": "德全商店",
+      "count": 1
+    },
+    {
+      "channel": "全家新營國道南店",
+      "count": 1
+    },
+    {
+      "channel": "安樂加油站",
+      "count": 1
+    },
+    {
+      "channel": "7-11安林門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11 汐止區康湖門市",
+      "count": 1
+    },
+    {
+      "channel": "岡山7-11",
+      "count": 1
+    },
+    {
+      "channel": "內湖熊貓超市",
+      "count": 1
+    },
+    {
+      "channel": "7-11梅北門市",
+      "count": 1
+    },
+    {
+      "channel": "悅成商店",
+      "count": 1
+    },
+    {
+      "channel": "澎水福利社",
+      "count": 1
+    },
+    {
+      "channel": "由申超市",
+      "count": 1
+    },
+    {
+      "channel": "澎湖進鑫",
+      "count": 1
+    },
+    {
+      "channel": "全聯(草屯店)",
+      "count": 1
+    },
+    {
+      "channel": "OK超商",
+      "count": 1
+    },
+    {
+      "channel": "家樂福鼎山店",
+      "count": 1
+    },
+    {
+      "channel": "喜互惠羅東店",
+      "count": 1
+    },
+    {
+      "channel": "7-11金寧門市",
+      "count": 1
+    },
+    {
+      "channel": "家樂福中原店",
+      "count": 1
+    },
+    {
+      "channel": "美聯社(台中豐原店)",
+      "count": 1
+    },
+    {
+      "channel": "長春路7-11",
+      "count": 1
+    },
+    {
+      "channel": "7-11金華店",
+      "count": 1
+    },
+    {
+      "channel": "蝦皮24h購物",
+      "count": 1
+    },
+    {
+      "channel": "雲林鍋貼",
+      "count": 1
+    },
+    {
+      "channel": "加油站",
+      "count": 1
+    },
+    {
+      "channel": "盤商",
+      "count": 1
+    },
+    {
+      "channel": "昌平家樂福便利購",
+      "count": 1
+    },
+    {
+      "channel": "美聯社",
+      "count": 1
+    },
+    {
+      "channel": "7-11鎵華門",
+      "count": 1
+    },
+    {
+      "channel": "7-11安佃門市",
+      "count": 1
+    },
+    {
+      "channel": "北門農工福利社",
+      "count": 1
+    },
+    {
+      "channel": "巨蛋鼎商",
+      "count": 1
+    },
+    {
+      "channel": "家樂福便利購",
+      "count": 1
+    },
+    {
+      "channel": "全家鳳山光華店",
+      "count": 1
+    },
+    {
+      "channel": "全聯 頭城青雲店",
+      "count": 1
+    },
+    {
+      "channel": "7-11板新區興洲門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11新坡門市",
+      "count": 1
+    },
+    {
+      "channel": "愛買線上",
+      "count": 1
+    },
+    {
+      "channel": "7-11高美門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11勝壢門市",
+      "count": 1
+    },
+    {
+      "channel": "家樂福中正店",
+      "count": 1
+    },
+    {
+      "channel": "萊爾富僑福店",
+      "count": 1
+    },
+    {
+      "channel": "利佳興商行",
+      "count": 1
+    },
+    {
+      "channel": "崇明國中福利社",
+      "count": 1
+    },
+    {
+      "channel": "7-11南投區埔慶門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11明日城門市",
+      "count": 1
+    },
+    {
+      "channel": "全聯台南六甲店",
+      "count": 1
+    },
+    {
+      "channel": "7-11新劉興 門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11 鑫通門市",
+      "count": 1
+    },
+    {
+      "channel": "7-11彰化門市",
+      "count": 1
+    },
+    {
+      "channel": "喜互惠超市",
+      "count": 1
+    },
+    {
+      "channel": "板橋7-11",
+      "count": 1
+    },
+    {
+      "channel": "檳榔攤",
+      "count": 1
+    },
+    {
+      "channel": "台糖",
+      "count": 1
+    },
+    {
+      "channel": "台中北區全家五義店",
+      "count": 1
+    },
+    {
+      "channel": "北投中央北路加油站 ",
+      "count": 1
+    },
+    {
+      "channel": "小北百貨東山店",
+      "count": 1
+    },
+    {
+      "channel": "便利商店",
+      "count": 1
+    },
+    {
+      "channel": "啟英高中福利社",
+      "count": 1
+    },
+    {
+      "channel": "全家(淡水淡海店)",
+      "count": 1
+    },
+    {
+      "channel": "新竹高工",
+      "count": 1
+    },
+    {
+      "channel": "7-11寶楊門市",
+      "count": 1
+    }
+  ],
+  "statusStats": [
+    {
+      "status": "距離有效期限10個月",
+      "count": 118
+    },
+    {
+      "status": "距離有效期限11個月",
+      "count": 86
+    },
+    {
+      "status": "距離有效期限9個月",
+      "count": 64
+    },
+    {
+      "status": "距離有效期限8個月",
+      "count": 27
+    },
+    {
+      "status": "距離有效期限7個月",
+      "count": 17
+    },
+    {
+      "status": "距離有效期限4個月",
+      "count": 9
+    },
+    {
+      "status": "距離有效期限6個月",
+      "count": 9
+    },
+    {
+      "status": "距離有效期限5個月",
+      "count": 9
+    },
+    {
+      "status": "-",
+      "count": 6
+    },
+    {
+      "status": "未知",
+      "count": 4
+    },
+    {
+      "status": "距離有效期限2個月",
+      "count": 3
+    },
+    {
+      "status": "距離有效期限0個月",
+      "count": 3
+    },
+    {
+      "status": "距離有效期限3個月",
+      "count": 2
+    },
+    {
+      "status": "過期",
+      "count": 1
+    },
+    {
+      "status": "距離有效期限1個月",
+      "count": 1
+    },
+    {
+      "status": "距離有效期限5天",
+      "count": 1
+    }
+  ],
+  "monthlyStats": [
+    {
+      "month": "202506",
+      "count": 1
+    },
+    {
+      "month": "202505",
+      "count": 1
+    },
+    {
+      "month": "202504",
+      "count": 6
+    },
+    {
+      "month": "202502",
+      "count": 3
+    },
+    {
+      "month": "202501",
+      "count": 2
+    },
+    {
+      "month": "202412",
+      "count": 2
+    },
+    {
+      "month": "202411",
+      "count": 5
+    },
+    {
+      "month": "202410",
+      "count": 4
+    },
+    {
+      "month": "202409",
+      "count": 1
+    },
+    {
+      "month": "202408",
+      "count": 7
+    },
+    {
+      "month": "202406",
+      "count": 1
+    },
+    {
+      "month": "202404",
+      "count": 5
+    },
+    {
+      "month": "202402",
+      "count": 3
+    },
+    {
+      "month": "202401",
+      "count": 2
+    },
+    {
+      "month": "202312",
+      "count": 2
+    },
+    {
+      "month": "202311",
+      "count": 1
+    },
+    {
+      "month": "202310",
+      "count": 1
+    },
+    {
+      "month": "202309",
+      "count": 4
+    },
+    {
+      "month": "202308",
+      "count": 7
+    },
+    {
+      "month": "202307",
+      "count": 5
+    },
+    {
+      "month": "202306",
+      "count": 2
+    },
+    {
+      "month": "202305",
+      "count": 3
+    },
+    {
+      "month": "202304",
+      "count": 2
+    },
+    {
+      "month": "202303",
+      "count": 1
+    },
+    {
+      "month": "202302",
+      "count": 3
+    },
+    {
+      "month": "202301",
+      "count": 2
+    },
+    {
+      "month": "202212",
+      "count": 3
+    },
+    {
+      "month": "202211",
+      "count": 2
+    },
+    {
+      "month": "202210",
+      "count": 3
+    },
+    {
+      "month": "202209",
+      "count": 7
+    },
+    {
+      "month": "202208",
+      "count": 4
+    },
+    {
+      "month": "202207",
+      "count": 2
+    },
+    {
+      "month": "202206",
+      "count": 7
+    },
+    {
+      "month": "202205",
+      "count": 4
+    },
+    {
+      "month": "202204",
+      "count": 3
+    },
+    {
+      "month": "202202",
+      "count": 2
+    },
+    {
+      "month": "202201",
+      "count": 1
+    },
+    {
+      "month": "202112",
+      "count": 2
+    },
+    {
+      "month": "202111",
+      "count": 3
+    },
+    {
+      "month": "202110",
+      "count": 9
+    },
+    {
+      "month": "202109",
+      "count": 7
+    },
+    {
+      "month": "202108",
+      "count": 3
+    },
+    {
+      "month": "202107",
+      "count": 10
+    },
+    {
+      "month": "202106",
+      "count": 10
+    },
+    {
+      "month": "202105",
+      "count": 6
+    },
+    {
+      "month": "202104",
+      "count": 4
+    },
+    {
+      "month": "202103",
+      "count": 6
+    },
+    {
+      "month": "202102",
+      "count": 1
+    },
+    {
+      "month": "202101",
+      "count": 3
+    },
+    {
+      "month": "201912",
+      "count": 5
+    },
+    {
+      "month": "201911",
+      "count": 3
+    },
+    {
+      "month": "201910",
+      "count": 3
+    },
+    {
+      "month": "201909",
+      "count": 3
+    },
+    {
+      "month": "201908",
+      "count": 4
+    },
+    {
+      "month": "201907",
+      "count": 5
+    },
+    {
+      "month": "201906",
+      "count": 7
+    },
+    {
+      "month": "201905",
+      "count": 5
+    },
+    {
+      "month": "201904",
+      "count": 5
+    },
+    {
+      "month": "201903",
+      "count": 6
+    },
+    {
+      "month": "201902",
+      "count": 9
+    },
+    {
+      "month": "201901",
+      "count": 14
+    },
+    {
+      "month": "201812",
+      "count": 22
+    },
+    {
+      "month": "201811",
+      "count": 11
+    },
+    {
+      "month": "201810",
+      "count": 6
+    },
+    {
+      "month": "201809",
+      "count": 7
+    },
+    {
+      "month": "201808",
+      "count": 8
+    },
+    {
+      "month": "201807",
+      "count": 4
+    },
+    {
+      "month": "201806",
+      "count": 4
+    },
+    {
+      "month": "201805",
+      "count": 2
+    },
+    {
+      "month": "201804",
+      "count": 3
+    },
+    {
+      "month": "201803",
+      "count": 3
+    },
+    {
+      "month": "201802",
+      "count": 1
+    },
+    {
+      "month": "201801",
+      "count": 1
+    },
+    {
+      "month": "201712",
+      "count": 1
+    },
+    {
+      "month": "201710",
+      "count": 8
+    },
+    {
+      "month": "201709",
+      "count": 4
+    },
+    {
+      "month": "201708",
+      "count": 6
+    },
+    {
+      "month": "201707",
+      "count": 1
+    },
+    {
+      "month": "201706",
+      "count": 4
+    },
+    {
+      "month": "201705",
+      "count": 1
+    },
+    {
+      "month": "201704",
+      "count": 6
+    },
+    {
+      "month": "201703",
+      "count": 2
+    },
+    {
+      "month": "201702",
+      "count": 5
+    },
+    {
+      "month": "201701",
+      "count": 1
+    }
+  ]
+}

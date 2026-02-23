@@ -1,0 +1,61 @@
+/* 客訴統計工具 - 主題變數（亮色/暗色） */
+
+:root,
+[data-theme="light"] {
+  --color-bg: #f8fafc;
+  --color-bg-elevated: #ffffff;
+  --color-card: #ffffff;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-secondary: #64748b;
+  --color-accent: #3b82f6;
+  --color-input-bg: #ffffff;
+  --color-input-border: #cbd5e1;
+  --chart-grid: rgba(0, 0, 0, 0.08);
+  --chart-text: #475569;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0f172a;
+  --color-bg-elevated: #1e293b;
+  --color-card: #1e293b;
+  --color-border: #334155;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-secondary: #94a3b8;
+  --color-accent: #60a5fa;
+  --color-input-bg: #334155;
+  --color-input-border: #475569;
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-text: #cbd5e1;
+}
+
+/* 側邊欄專用（略深/略淺以區分） */
+[data-theme="light"] {
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-text: #0f172a;
+  --sidebar-text-muted: #64748b;
+  --sidebar-active-bg: #eff6ff;
+  --sidebar-active-text: #2563eb;
+}
+
+[data-theme="dark"] {
+  --sidebar-bg: #0f172a;
+  --sidebar-border: #334155;
+  --sidebar-text: #f1f5f9;
+  --sidebar-text-muted: #94a3b8;
+  --sidebar-active-bg: #1e3a5f;
+  --sidebar-active-text: #93c5fd;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
