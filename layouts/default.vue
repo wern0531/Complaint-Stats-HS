@@ -87,7 +87,11 @@
 
     <!-- 主內容區 -->
     <main class="flex-1 flex flex-col min-w-0 overflow-auto">
-      <slot />
+      <div class="contents">
+        <slot>
+          <div class="p-6 text-sm" style="color: var(--color-text-muted);">載入中...</div>
+        </slot>
+      </div>
     </main>
   </div>
 </template>

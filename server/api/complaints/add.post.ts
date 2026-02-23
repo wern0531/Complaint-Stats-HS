@@ -1,81 +1,115 @@
 import type { Complaint } from '~/types/complaint'
-import { mockData } from '~/server/data/mockData'
+import { getFirebaseAdmin } from '~/server/utils/firebase'
+import { complaintAddSchema } from '~/server/utils/complaintSchema'
+import admin from 'firebase-admin'
+
+const COMPLAINTS_COLLECTION = 'complaints'
 
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    
-    // 使用 mockData 作為資料來源
-    let realComplaints = [...mockData] as Complaint[]
-    
-    // 驗證必填欄位
-    if (!body.complaintNumber || !body.productItem || !body.consumerReactionPoint) {
+    const parsed = complaintAddSchema.safeParse(body)
+
+    if (!parsed.success) {
+      const issues = parsed.error.issues
+      const message = issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('；')
+      setResponseStatus(event, 400)
       return {
         success: false,
-        message: '客訴編號、產品品項和消費者反映點為必填欄位'
+        message: '資料驗證失敗',
+        error: message,
+        errors: issues.map((i) => ({ path: i.path.join('.'), message: i.message }))
       }
     }
-    
-    // 檢查客訴編號是否已存在
-    const existingComplaint = realComplaints.find(
-      (complaint: Complaint) => complaint.complaintNumber === body.complaintNumber
-    )
-    
-    if (existingComplaint) {
+
+    const data = parsed.data
+    const { db } = getFirebaseAdmin(event)
+
+    const existing = await db
+      .collection(COMPLAINTS_COLLECTION)
+      .where('complaintNumber', '==', data.complaintNumber)
+      .limit(1)
+      .get()
+
+    if (!existing.empty) {
+      setResponseStatus(event, 400)
       return {
         success: false,
         message: '客訴編號已存在，請使用不同的編號'
       }
     }
-    
-    // 創建新的客訴記錄
-    const newComplaint: Complaint = {
-      _id: body.complaintNumber,
-      complaintNumber: body.complaintNumber,
-      productItem: body.productItem,
-      manufacturingMachine: body.manufacturingMachine || '未知',
-      expiryDate: body.expiryDate || '',
-      consumerReactionPoint: body.consumerReactionPoint,
-      reactionTime: body.reactionTime || new Date().toISOString().slice(0, 10).replace(/-/g, ''),
-      productStatus: body.productStatus || '未知',
-      storagePeriodMonths: body.storagePeriodMonths || 0,
-      departmentReply: body.departmentReply || '',
-      causeAnalysis: body.causeAnalysis || '',
-      distributor: body.distributor || '',
-      regionAddress: body.regionAddress || '',
-      city: body.city || '未知',
-      consumer: body.consumer || '未知',
-      purchaseChannel: body.purchaseChannel || '未知',
-      trackNumber: body.trackNumber || '',
-      quantity: body.quantity || 1,
-      percentage: body.percentage || 0,
-      totalQuantity: body.totalQuantity || 0,
-      storageMonths: body.storageMonths || '',
-      complaintQuantity: body.complaintQuantity || 1,
-      complaintPercentage: body.complaintPercentage || 0,
-      cumulativePercentage: body.cumulativePercentage || 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+
+    const nowIso = new Date().toISOString()
+    const docData = {
+      complaintNumber: data.complaintNumber,
+      productItem: data.productItem,
+      manufacturingMachine: data.manufacturingMachine ?? '未知',
+      expiryDate: data.expiryDate ?? '',
+      consumerReactionPoint: data.consumerReactionPoint,
+      reactionTime: data.reactionTime ?? new Date().toISOString().slice(0, 10).replace(/-/g, ''),
+      productStatus: data.productStatus ?? '未知',
+      storagePeriodMonths: data.storagePeriodMonths ?? 0,
+      departmentReply: data.departmentReply ?? '',
+      causeAnalysis: data.causeAnalysis ?? '',
+      distributor: data.distributor ?? '',
+      regionAddress: data.regionAddress ?? '',
+      city: data.city ?? '未知',
+      consumer: data.consumer ?? '未知',
+      purchaseChannel: data.purchaseChannel ?? '未知',
+      trackNumber: data.trackNumber ?? '',
+      quantity: data.quantity ?? 1,
+      percentage: data.percentage ?? 0,
+      totalQuantity: data.totalQuantity ?? 0,
+      storageMonths: data.storageMonths ?? '',
+      complaintQuantity: data.complaintQuantity ?? 1,
+      complaintPercentage: data.complaintPercentage ?? 0,
+      cumulativePercentage: data.cumulativePercentage ?? 0,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
     }
-    
-    // 添加到數據中
-    realComplaints.push(newComplaint)
-    
-    // 注意：在 serverless 環境中，無法持久化保存資料
-    // 這裡只是模擬新增功能，實際生產環境應該使用數據庫
-    
+
+    const ref = await db.collection(COMPLAINTS_COLLECTION).add(docData)
+
+    const newComplaint: Complaint = {
+      _id: ref.id,
+      complaintNumber: data.complaintNumber,
+      productItem: data.productItem,
+      manufacturingMachine: data.manufacturingMachine ?? '未知',
+      expiryDate: data.expiryDate ?? '',
+      consumerReactionPoint: data.consumerReactionPoint,
+      reactionTime: data.reactionTime ?? new Date().toISOString().slice(0, 10).replace(/-/g, ''),
+      productStatus: data.productStatus ?? '未知',
+      storagePeriodMonths: data.storagePeriodMonths ?? 0,
+      departmentReply: data.departmentReply ?? '',
+      causeAnalysis: data.causeAnalysis ?? '',
+      distributor: data.distributor ?? '',
+      regionAddress: data.regionAddress ?? '',
+      city: data.city ?? '未知',
+      consumer: data.consumer ?? '未知',
+      purchaseChannel: data.purchaseChannel ?? '未知',
+      trackNumber: data.trackNumber ?? '',
+      quantity: data.quantity ?? 1,
+      percentage: data.percentage ?? 0,
+      totalQuantity: data.totalQuantity ?? 0,
+      storageMonths: data.storageMonths ?? '',
+      complaintQuantity: data.complaintQuantity ?? 1,
+      complaintPercentage: data.complaintPercentage ?? 0,
+      cumulativePercentage: data.cumulativePercentage ?? 0,
+      createdAt: nowIso,
+      updatedAt: nowIso
+    }
+
     return {
       success: true,
       message: '客訴新增成功',
       data: newComplaint
     }
-    
   } catch (error) {
     console.error('新增客訴失敗:', error)
+    setResponseStatus(event, 500)
     return {
       success: false,
       message: '新增客訴失敗，請稍後再試'
     }
   }
 })
-

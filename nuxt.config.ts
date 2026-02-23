@@ -40,9 +40,11 @@ export default defineNuxtConfig({
 
   // 環境變數設定
   runtimeConfig: {
-    // 私有環境變數（僅在伺服器端可用）
-    // mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/complaint-system',
-    
+    // 私有環境變數（僅在伺服器端可用）- Firebase Admin
+    firebaseProjectId: process.env.FIREBASE_PROJECT_ID || '',
+    firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL || '',
+    firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY || '',
+
     // 公開環境變數（客戶端也可用）
     public: {
       apiBase: '/api'

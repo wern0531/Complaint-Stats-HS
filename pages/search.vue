@@ -30,7 +30,15 @@
         </div>
         <div class="lg:col-span-3">
           <div class="card overflow-hidden">
-            <ComplaintTable :complaints="complaints" :loading="loading" @view-detail="handleViewDetail" @edit-complaint="handleEditComplaint" />
+            <ComplaintTable
+              :complaints="complaints"
+              :loading="loading"
+              :sort-by="sortBy"
+              :sort-order="sortOrder"
+              @view-detail="handleViewDetail"
+              @edit-complaint="handleEditComplaint"
+              @sort="handleSort"
+            />
           </div>
         </div>
       </div>
@@ -94,10 +102,23 @@ const showDetailModal = ref(false)
 const editData = ref<Complaint | null>(null)
 const detailData = ref<Complaint | null>(null)
 
+const sortBy = ref('')
+const sortOrder = ref<'asc' | 'desc'>('desc')
+const lastFilters = ref<Record<string, string>>({})
+
+const buildParams = () => {
+  const p: Record<string, string> = { ...lastFilters.value }
+  if (sortBy.value) p.sortBy = sortBy.value
+  if (sortOrder.value) p.sortOrder = sortOrder.value
+  return p
+}
+
 const handleSearch = async (filters: Record<string, string>) => {
+  lastFilters.value = { ...filters }
+  const params = buildParams()
   loading.value = true
   try {
-    const queryString = new URLSearchParams(filters).toString()
+    const queryString = new URLSearchParams(params).toString()
     const response = await fetch(`/api/complaints/list?${queryString}`).then(res => res.json())
     if (response.success) complaints.value = response.data?.complaints || []
     else console.error('搜尋失敗:', response.message)
@@ -106,6 +127,12 @@ const handleSearch = async (filters: Record<string, string>) => {
   } finally {
     loading.value = false
   }
+}
+
+const handleSort = (payload: { sortBy: string; sortOrder: 'asc' | 'desc' }) => {
+  sortBy.value = payload.sortBy
+  sortOrder.value = payload.sortOrder
+  handleSearch(lastFilters.value)
 }
 
 const handleSubmit = async (data: Partial<Complaint>) => {

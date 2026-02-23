@@ -21,10 +21,23 @@
       <table class="min-w-full table-divide">
         <thead class="table-thead">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider table-th">客訴編號</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider table-th">產品品項</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider table-th">製造機台</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider table-th">縣市</th>
+            <th
+              v-for="col in sortableColumns"
+              :key="col.field"
+              class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider table-th sortable-th"
+              :class="{ 'sortable-th--active': sortBy === col.field }"
+              @click="col.sortable ? handleSortClick(col.field) : null"
+            >
+              <span class="inline-flex items-center gap-1">
+                {{ col.label }}
+                <span v-if="col.sortable" class="sort-icon">
+                  <span v-if="sortBy !== col.field" class="sort-icon-both" aria-hidden="true">⇅</span>
+                  <span v-else class="sort-icon-direction" :class="sortOrder === 'asc' ? 'sort-asc' : 'sort-desc'" aria-hidden="true">
+                    {{ sortOrder === 'asc' ? '↑' : '↓' }}
+                  </span>
+                </span>
+              </span>
+            </th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider table-th">反映點</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider table-th">原因分析</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider table-th">操作</th>
@@ -38,6 +51,7 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td max-w-[200px] truncate">{{ complaint.productItem }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td">{{ complaint.manufacturingMachine }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td">{{ complaint.city }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm table-td">{{ formatReactionTime(complaint.reactionTime) }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td max-w-[200px] truncate">{{ complaint.consumerReactionPoint }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td max-w-[200px] truncate">{{ complaint.causeAnalysis || '未分析' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium table-td">
@@ -56,17 +70,47 @@
 <script setup lang="ts">
 import type { Complaint } from '~/types/complaint'
 
+type SortOrder = 'asc' | 'desc'
+
 interface Props {
   complaints: Complaint[]
   loading: boolean
+  sortBy?: string
+  sortOrder?: SortOrder
 }
 
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  sortBy: '',
+  sortOrder: 'desc'
+})
 
-defineEmits<{
+const emit = defineEmits<{
   'view-detail': [complaint: Complaint]
   'edit-complaint': [complaint: Complaint]
+  sort: [payload: { sortBy: string; sortOrder: SortOrder }]
 }>()
+
+const sortableColumns = [
+  { field: 'complaintNumber', label: '客訴編號', sortable: true },
+  { field: 'productItem', label: '產品品項', sortable: true },
+  { field: 'manufacturingMachine', label: '製造機台', sortable: true },
+  { field: 'city', label: '縣市', sortable: true },
+  { field: 'reactionTime', label: '日期', sortable: true }
+]
+
+function handleSortClick(field: string) {
+  const nextOrder: SortOrder =
+    props.sortBy === field && props.sortOrder === 'asc' ? 'desc' : 'asc'
+  emit('sort', { sortBy: field, sortOrder: nextOrder })
+}
+
+function formatReactionTime(value?: string): string {
+  if (!value) return '—'
+  if (value.length === 8) {
+    return `${value.slice(0, 4)}/${value.slice(4, 6)}/${value.slice(6, 8)}`
+  }
+  return value
+}
 </script>
 
 <style scoped>
@@ -78,6 +122,13 @@ defineEmits<{
 .table-divide { border-color: var(--color-border); }
 .table-thead { background-color: var(--color-bg-elevated); }
 .table-th { color: var(--color-text-muted); }
+.sortable-th { cursor: pointer; user-select: none; }
+.sortable-th:hover { color: var(--color-text); }
+.sortable-th--active { color: var(--color-primary); }
+.sort-icon { opacity: 0.7; font-size: 0.75rem; }
+.sortable-th--active .sort-icon { opacity: 1; }
+.sort-icon-both { font-size: 0.7rem; }
+.sort-icon-direction { display: inline-block; }
 .table-tbody { background-color: var(--color-card); }
 .table-row { border-bottom: 1px solid var(--color-border); }
 .table-row:hover { background-color: var(--color-bg-elevated); }
