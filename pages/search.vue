@@ -5,8 +5,13 @@
         <div>
           <h1 class="text-2xl font-bold page-title">客訴搜尋</h1>
           <p class="text-sm mt-1 page-subtitle">依條件篩選並檢視客訴記錄</p>
+          <p v-if="filterSummary" class="text-xs mt-1.5 page-subtitle">目前條件：{{ filterSummary }}</p>
         </div>
         <div class="flex flex-wrap gap-3">
+          <button type="button" @click="filterModalOpen = true" class="btn btn-outline">
+            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" /></svg>
+            篩選條件
+          </button>
           <button type="button" @click="showUploadModal = true" class="btn btn-secondary">
             <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
             Excel 上傳
@@ -22,14 +27,7 @@
         </div>
       </header>
 
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="lg:col-span-1">
-          <div class="card p-5">
-            <SearchFilters @search="handleSearch" />
-          </div>
-        </div>
-        <div class="lg:col-span-3">
-          <div class="card overflow-hidden">
+      <div class="card overflow-hidden">
             <ComplaintTable
               :complaints="complaints"
               :loading="loading"
@@ -40,9 +38,9 @@
               @sort="handleSort"
             />
           </div>
-        </div>
-      </div>
     </div>
+
+    <FilterModal v-model="filterModalOpen" @search="handleSearch" />
 
     <ComplaintModal :is-open="showModal" :edit-data="editData" @close="closeModal" @submit="handleSubmit" />
 
@@ -87,7 +85,7 @@
 
 <script setup lang="ts">
 import type { Complaint } from '~/types/complaint'
-import SearchFilters from '~/components/SearchFilters.vue'
+import FilterModal from '~/components/FilterModal.vue'
 import ComplaintTable from '~/components/ComplaintTable.vue'
 import ComplaintModal from '~/components/ComplaintModal.vue'
 import ExcelUpload from '~/components/ExcelUpload.vue'
@@ -99,12 +97,26 @@ const complaints = ref<Complaint[]>([])
 const showModal = ref(false)
 const showUploadModal = ref(false)
 const showDetailModal = ref(false)
+const filterModalOpen = ref(false)
 const editData = ref<Complaint | null>(null)
 const detailData = ref<Complaint | null>(null)
 
 const sortBy = ref('')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const lastFilters = ref<Record<string, string>>({})
+
+const filterSummary = computed(() => {
+  const f = lastFilters.value
+  const parts: string[] = []
+  if (f.startDate) parts.push(f.startDate)
+  if (f.endDate) parts.push(f.endDate)
+  if (f.city) parts.push(f.city)
+  if (f.product) parts.push(f.product)
+  if (f.channel) parts.push(f.channel)
+  if (f.machine) parts.push(f.machine)
+  if (!parts.length) return ''
+  return parts.join('、')
+})
 
 const buildParams = () => {
   const p: Record<string, string> = { ...lastFilters.value }

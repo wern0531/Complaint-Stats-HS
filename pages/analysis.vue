@@ -66,7 +66,13 @@
           <h2 class="text-lg font-semibold page-title mb-1">每月客訴數量趨勢（近 12 個月）</h2>
           <p class="text-sm page-subtitle mb-4">依反映時間統計</p>
           <div class="h-[280px]">
-            <LineChart :data="monthlyChartData" title="" subtitle="" height="280px" />
+            <LineChart
+              :data="monthlyChartData"
+              title=""
+              subtitle=""
+              height="280px"
+              @enlarge="openChartModal('line', monthlyChartData, '每月客訴數量趨勢（近 12 個月）', '依反映時間統計')"
+            />
           </div>
         </section>
 
@@ -74,11 +80,21 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div class="card p-5">
             <h3 class="text-base font-semibold page-title mb-4">購買通路分布</h3>
-            <HorizontalBarChart :data="channelBarData" title="" height="260px" />
+            <HorizontalBarChart
+              :data="channelBarData"
+              title=""
+              height="260px"
+              @enlarge="openChartModal('horizontalBar', channelBarData, '購買通路分布')"
+            />
           </div>
           <div class="card p-5">
             <h3 class="text-base font-semibold page-title mb-4">產品狀態分布</h3>
-            <HorizontalBarChart :data="statusBarData" title="" height="260px" />
+            <HorizontalBarChart
+              :data="statusBarData"
+              title=""
+              height="260px"
+              @enlarge="openChartModal('horizontalBar', statusBarData, '產品狀態分布')"
+            />
           </div>
         </div>
 
@@ -86,11 +102,21 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div class="card p-5">
             <h3 class="text-base font-semibold page-title mb-4">縣市客訴統計</h3>
-            <BarChart :data="cityChartData" title="" height="260px" />
+            <BarChart
+              :data="cityChartData"
+              title=""
+              height="260px"
+              @enlarge="openChartModal('bar', cityChartData, '縣市客訴統計')"
+            />
           </div>
           <div class="card p-5">
             <h3 class="text-base font-semibold page-title mb-4">產品客訴統計</h3>
-            <BarChart :data="productChartData" title="" height="260px" />
+            <BarChart
+              :data="productChartData"
+              title=""
+              height="260px"
+              @enlarge="openChartModal('bar', productChartData, '產品客訴統計')"
+            />
           </div>
         </div>
 
@@ -129,12 +155,21 @@
           </div>
         </section>
       </template>
+
+      <ChartZoomModal
+        v-model="chartModalOpen"
+        :chart-type="chartModalType"
+        :data="chartModalData"
+        :title="chartModalTitle"
+        :subtitle="chartModalSubtitle"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import BarChart from '~/components/BarChart.vue'
+import ChartZoomModal from '~/components/common/ChartZoomModal.vue'
 import LineChart from '~/components/LineChart.vue'
 import HorizontalBarChart from '~/components/HorizontalBarChart.vue'
 import {
@@ -186,6 +221,25 @@ function getFilterLabel() {
   if (selectedPeriod.value === 'single' && selectedMonth.value !== '') return `${selectedMonth.value}月`
   if (selectedPeriod.value === 'range' && startMonth.value !== '' && endMonth.value !== '') return `${startMonth.value}月 ~ ${endMonth.value}月`
   return '全部'
+}
+
+const chartModalOpen = ref(false)
+const chartModalType = ref<'bar' | 'line' | 'pie' | 'horizontalBar'>('line')
+const chartModalData = ref<{ labels: string[]; datasets: unknown[] } | null>(null)
+const chartModalTitle = ref('')
+const chartModalSubtitle = ref('')
+
+function openChartModal(
+  type: 'bar' | 'line' | 'pie' | 'horizontalBar',
+  data: { labels: string[]; datasets: unknown[] },
+  title: string,
+  subtitle?: string
+) {
+  chartModalType.value = type
+  chartModalData.value = data
+  chartModalTitle.value = title
+  chartModalSubtitle.value = subtitle ?? ''
+  chartModalOpen.value = true
 }
 
 function getCityColor(cityName: string) {
