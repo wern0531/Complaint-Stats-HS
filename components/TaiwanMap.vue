@@ -2,7 +2,6 @@
   <div class="bg-white rounded-lg shadow-md p-6">
     <h3 class="text-lg font-medium text-gray-900 mb-4">台灣各縣市客訴統計地圖</h3>
 
-    <!-- 地圖容器：SVG 隨容器寬度縮放 (RWD) -->
     <div class="relative w-full max-w-4xl mx-auto">
       <div ref="mapWrapRef" class="taiwan-map-wrap relative w-full" style="aspect-ratio: 1000/1295;">
         <svg
@@ -14,28 +13,28 @@
           @mouseleave="tooltip = null"
         >
           <path
-            v-for="loc in mapLocations"
+            v-for="loc in filteredLocations"
             :key="loc.id"
             :id="loc.id"
             :d="loc.path"
-            :data-name="pathIdToName(loc.id)"
             :fill="getFillForPath(loc.id)"
-            :stroke="getStrokeForPath(loc.id)"
+            stroke="#ffffff"
             stroke-width="1"
-            class="transition-colors duration-200 cursor-pointer"
-            @mouseenter="showTooltip(loc.id)"
-            @mouseleave="tooltip = null"
+            class="region-path transition-colors duration-200 cursor-pointer"
+            :class="{ 'region-path--hover': hoverId === loc.id }"
+            @mouseenter="setHover(loc.id)"
+            @mouseleave="hoverId = null"
           />
         </svg>
 
-        <!-- Hover Tooltip -->
+        <!-- 浮動 Tooltip：跟隨滑鼠 -->
         <div
           v-if="tooltip"
-          class="absolute pointer-events-none z-20 px-3 py-2 rounded-lg shadow-lg border border-gray-200 bg-white text-sm"
+          class="tooltip-box absolute pointer-events-none z-20 px-3 py-2 rounded-lg shadow-lg bg-white border border-gray-200 text-sm"
           :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px', transform: 'translate(8px, 8px)' }"
         >
-          <div class="font-semibold text-gray-900">{{ tooltip.name }}</div>
-          <div class="text-gray-600">客訴數量：{{ tooltip.count }} 件</div>
+          <span class="font-semibold text-gray-900">{{ tooltip.name }}</span>
+          <span class="text-gray-600">：{{ tooltip.count }} 件</span>
         </div>
       </div>
 
@@ -82,9 +81,32 @@
 import { ref, onMounted, computed } from 'vue'
 import taiwanMapData from '@svg-maps/taiwan'
 
-const mapLocations = computed(() => (taiwanMapData?.locations ?? []) as Array<{ id: string; name: string; path: string }>)
+/** 只顯示本島縣市 + 澎湖、金門、連江，其餘小島過濾掉 */
+const ALLOWED_IDS = [
+  'keelung-city',
+  'taipei-city',
+  'new-taipei-city',
+  'taoyuan-city',
+  'hsinchu-city',
+  'hsinchu-county',
+  'miaoli-county',
+  'taichung-city',
+  'changhua-county',
+  'nantou-county',
+  'yunlin-county',
+  'chiayi-city',
+  'chiayi-county',
+  'tainan-city',
+  'kaohsiung-city',
+  'pingtung-county',
+  'yilan-county',
+  'hualien-county',
+  'taitung-county',
+  'penghu-county',
+  'kinmen-county',
+  'lienchiang-county'
+] as const
 
-// SVG path id 對應中文縣市名稱（API 可能回傳「台北市」或「台北」）
 const PATH_ID_TO_NAMES: Record<string, string[]> = {
   'changhua-county': ['彰化縣', '彰化'],
   'chiayi-city': ['嘉義市', '嘉義'],
@@ -110,13 +132,22 @@ const PATH_ID_TO_NAMES: Record<string, string[]> = {
   'yunlin-county': ['雲林縣', '雲林']
 }
 
+const allowedSet = new Set(ALLOWED_IDS)
+
+const mapLocations = computed(
+  () => (taiwanMapData?.locations ?? []) as Array<{ id: string; name: string; path: string }>
+)
+const filteredLocations = computed(() =>
+  mapLocations.value.filter((loc) => allowedSet.has(loc.id as (typeof ALLOWED_IDS)[number]))
+)
+
 const cityStats = ref<Array<{ city: string; count: number }>>([])
-const tooltip = ref<{ name: string; count: number; x: number; y: number } | null>(null)
 const mapWrapRef = ref<HTMLElement | null>(null)
+const hoverId = ref<string | null>(null)
+const tooltip = ref<{ name: string; count: number; x: number; y: number } | null>(null)
 
 function pathIdToName(id: string): string {
-  const names = PATH_ID_TO_NAMES[id]
-  return names ? names[0] : id
+  return PATH_ID_TO_NAMES[id]?.[0] ?? id
 }
 
 function getCountForPath(pathId: string): number {
@@ -134,17 +165,10 @@ function getFillForPath(pathId: string): string {
   return '#9ca3af'
 }
 
-function getStrokeForPath(pathId: string): string {
-  const count = getCountForPath(pathId)
-  if (count >= 10) return '#b91c1c'
-  if (count >= 5) return '#d97706'
-  if (count >= 1) return '#059669'
-  return '#6b7280'
-}
-
-function showTooltip(pathId: string) {
-  const name = pathIdToName(pathId)
-  const count = getCountForPath(pathId)
+function setHover(id: string) {
+  hoverId.value = id
+  const name = pathIdToName(id)
+  const count = getCountForPath(id)
   tooltip.value = { name, count, x: 0, y: 0 }
 }
 
@@ -190,5 +214,11 @@ onMounted(() => {
 <style scoped>
 .taiwan-map-wrap {
   min-height: 200px;
+}
+.region-path--hover {
+  filter: brightness(0.95);
+}
+.tooltip-box {
+  color: #1f2937;
 }
 </style>

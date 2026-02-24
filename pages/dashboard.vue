@@ -50,6 +50,11 @@
         </div>
       </div>
 
+      <!-- 台灣縣市客訴地圖 -->
+      <div class="mb-8">
+        <TaiwanMap />
+      </div>
+
       <!-- 主要圖表：近 12 個月趨勢 -->
       <section
         class="rounded-xl p-5 lg:p-6 border shadow-sm mb-8"
@@ -121,6 +126,7 @@
 <script setup lang="ts">
 import BarChart from '~/components/BarChart.vue'
 import LineChart from '~/components/LineChart.vue'
+import TaiwanMap from '~/components/TaiwanMap.vue'
 import {
   transformCityStatsToBarChart,
   transformProductStatsToBarChart,
