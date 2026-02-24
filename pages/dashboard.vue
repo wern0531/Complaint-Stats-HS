@@ -7,7 +7,7 @@
       </header>
 
       <!-- KPI 卡片 -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div
           class="rounded-xl p-5 border shadow-sm"
           style="background-color: var(--color-card); border-color: var(--color-border);"
@@ -50,11 +50,6 @@
         </div>
       </div>
 
-      <!-- 台灣縣市客訴地圖 -->
-      <div class="mb-8">
-        <TaiwanMap />
-      </div>
-
       <!-- 主要圖表：近 12 個月趨勢 -->
       <section
         class="rounded-xl p-5 lg:p-6 border shadow-sm mb-8"
@@ -66,44 +61,22 @@
         <p class="text-sm mb-4" style="color: var(--color-text-muted);">
           近 12 個月客訴筆數（依反映時間）
         </p>
-        <div v-if="statsLoading" class="flex items-center justify-center py-12">
+        <div v-if="statsLoading" class="flex items-center justify-center py-16">
           <div
             class="animate-spin rounded-full h-8 w-8 border-2 border-transparent"
             style="border-top-color: var(--color-primary);"
           />
           <span class="ml-3" style="color: var(--color-text-muted);">載入中...</span>
         </div>
-        <div v-else-if="monthlyChartData.labels?.length" class="h-[280px]">
-          <LineChart :data="monthlyChartData" title="" subtitle="" height="280px" />
+        <div v-else-if="monthlyChartData.labels?.length" class="h-[380px]">
+          <LineChart :data="monthlyChartData" title="" subtitle="" height="380px" />
         </div>
-        <div v-else class="h-[280px] flex items-center justify-center text-sm" style="color: var(--color-text-muted);">
+        <div v-else class="h-[380px] flex items-center justify-center text-sm" style="color: var(--color-text-muted);">
           尚無近 12 個月資料
         </div>
       </section>
 
-      <!-- 次要圖表：縣市、產品 -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div
-          class="rounded-xl p-5 border shadow-sm"
-          style="background-color: var(--color-card); border-color: var(--color-border);"
-        >
-          <h3 class="text-base font-semibold mb-4" style="color: var(--color-text);">
-            縣市客訴統計
-          </h3>
-          <BarChart :data="cityChartData" title="" height="260px" />
-        </div>
-        <div
-          class="rounded-xl p-5 border shadow-sm"
-          style="background-color: var(--color-card); border-color: var(--color-border);"
-        >
-          <h3 class="text-base font-semibold mb-4" style="color: var(--color-text);">
-            產品客訴統計
-          </h3>
-          <BarChart :data="productChartData" title="" height="260px" />
-        </div>
-      </div>
-
-      <div class="flex flex-wrap gap-3">
+      <div class="flex flex-wrap gap-3 mt-2">
         <NuxtLink
           to="/search"
           class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
@@ -118,20 +91,21 @@
         >
           完整分析圖表
         </NuxtLink>
+        <NuxtLink
+          to="/map"
+          class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border transition-colors"
+          style="border-color: var(--color-border); color: var(--color-text);"
+        >
+          地理分佈地圖
+        </NuxtLink>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import BarChart from '~/components/BarChart.vue'
 import LineChart from '~/components/LineChart.vue'
-import TaiwanMap from '~/components/TaiwanMap.vue'
-import {
-  transformCityStatsToBarChart,
-  transformProductStatsToBarChart,
-  transformMonthlyStatsToLineChart
-} from '~/utils/chartDataTransformer'
+import { transformMonthlyStatsToLineChart } from '~/utils/chartDataTransformer'
 
 useHead({ title: '儀表板 - 客訴統計搜尋工具' })
 
@@ -148,16 +122,6 @@ const monthlyChartData = computed(() => {
     return { labels: [], datasets: [] }
   }
   return transformMonthlyStatsToLineChart(statsData.value.monthlyStats)
-})
-
-const cityChartData = computed(() => {
-  if (!statsData.value?.cityStats) return { labels: [], datasets: [] }
-  return transformCityStatsToBarChart(statsData.value.cityStats)
-})
-
-const productChartData = computed(() => {
-  if (!statsData.value?.productStats) return { labels: [], datasets: [] }
-  return transformProductStatsToBarChart(statsData.value.productStats)
 })
 
 const last12Total = computed(() => {

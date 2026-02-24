@@ -132,6 +132,29 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    // 依 query 在記憶體篩選：縣市、產品、機台、通路（供地圖頁與統計篩選）
+    const filterCity = (query.city as string)?.trim()
+    const filterProduct = (query.product as string)?.trim()
+    const filterMachine = (query.machine as string)?.trim()
+    const filterChannel = (query.channel as string)?.trim()
+    if (filterCity) {
+      const cityNorm = filterCity.endsWith('市') || filterCity.endsWith('縣') ? filterCity.slice(0, -1) : filterCity
+      complaints = complaints.filter((c) => {
+        const cCity = c.city || ''
+        const cNorm = cCity.endsWith('市') || cCity.endsWith('縣') ? cCity.slice(0, -1) : cCity
+        return cNorm === cityNorm || cCity === filterCity
+      })
+    }
+    if (filterProduct) {
+      complaints = complaints.filter((c) => (c.productItem || '').includes(filterProduct))
+    }
+    if (filterMachine) {
+      complaints = complaints.filter((c) => (c.manufacturingMachine || '') === filterMachine)
+    }
+    if (filterChannel) {
+      complaints = complaints.filter((c) => normalizeChannel(c.purchaseChannel) === filterChannel)
+    }
+
     // 縣市統計
     const cityMap = new Map<string, number>()
     complaints.forEach((complaint) => {
