@@ -37,6 +37,34 @@
               @edit-complaint="handleEditComplaint"
               @sort="handleSort"
             />
+            <!-- 分頁 -->
+            <div
+              v-if="total > 0"
+              class="flex items-center justify-between gap-4 px-6 py-3 border-t text-sm"
+              style="border-color: var(--color-border);"
+            >
+              <span class="page-subtitle">第 {{ currentPage }} / {{ totalPages }} 頁，共 {{ total }} 筆</span>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  class="px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style="border-color: var(--color-border); color: var(--color-text);"
+                  :disabled="currentPage <= 1"
+                  @click="goToPage(currentPage - 1)"
+                >
+                  上一頁
+                </button>
+                <button
+                  type="button"
+                  class="px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  style="border-color: var(--color-border); color: var(--color-text);"
+                  :disabled="currentPage >= totalPages"
+                  @click="goToPage(currentPage + 1)"
+                >
+                  下一頁
+                </button>
+              </div>
+            </div>
           </div>
     </div>
 
@@ -104,6 +132,11 @@ const detailData = ref<Complaint | null>(null)
 const sortBy = ref('')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const lastFilters = ref<Record<string, string>>({})
+const PAGE_LIMIT = 10
+const currentPage = ref(1)
+const total = ref(0)
+
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / PAGE_LIMIT)))
 
 const filterSummary = computed(() => {
   const f = lastFilters.value
@@ -122,18 +155,21 @@ const buildParams = () => {
   const p: Record<string, string> = { ...lastFilters.value }
   if (sortBy.value) p.sortBy = sortBy.value
   if (sortOrder.value) p.sortOrder = sortOrder.value
+  p.limit = String(PAGE_LIMIT)
+  p.page = String(currentPage.value)
   return p
 }
 
-const handleSearch = async (filters: Record<string, string>) => {
-  lastFilters.value = { ...filters }
+async function fetchList() {
   const params = buildParams()
   loading.value = true
   try {
     const queryString = new URLSearchParams(params).toString()
     const response = await fetch(`/api/complaints/list?${queryString}`).then(res => res.json())
-    if (response.success) complaints.value = response.data?.complaints || []
-    else console.error('搜尋失敗:', response.message)
+    if (response.success) {
+      complaints.value = response.data?.complaints || []
+      total.value = response.data?.total ?? 0
+    } else console.error('搜尋失敗:', response.message)
   } catch (e) {
     console.error('搜尋錯誤:', e)
   } finally {
@@ -141,10 +177,23 @@ const handleSearch = async (filters: Record<string, string>) => {
   }
 }
 
+const handleSearch = async (filters: Record<string, string>) => {
+  lastFilters.value = { ...filters }
+  currentPage.value = 1
+  await fetchList()
+}
+
+function goToPage(page: number) {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+  fetchList()
+}
+
 const handleSort = (payload: { sortBy: string; sortOrder: 'asc' | 'desc' }) => {
   sortBy.value = payload.sortBy
   sortOrder.value = payload.sortOrder
-  handleSearch(lastFilters.value)
+  currentPage.value = 1
+  fetchList()
 }
 
 const handleSubmit = async (data: Partial<Complaint>) => {
@@ -178,7 +227,9 @@ const closeModal = () => {
 }
 
 const handleUploadSuccess = () => {
-  handleSearch({})
+  lastFilters.value = {}
+  currentPage.value = 1
+  fetchList()
   showUploadModal.value = false
 }
 
@@ -186,7 +237,7 @@ const handleUploadError = (err: string) => {
   console.error('上傳錯誤:', err)
 }
 
-onMounted(() => { handleSearch({}) })
+onMounted(() => { fetchList() })
 </script>
 
 <style scoped>

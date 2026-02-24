@@ -1,7 +1,7 @@
 <template>
   <div
-    class="dashboard-page flex flex-col p-4 lg:p-5 max-w-7xl mx-auto"
-    style="color: var(--color-text); height: calc(100vh - 2rem); max-height: calc(100vh - 2rem);"
+    class="dashboard-page flex flex-col w-full p-6"
+    style="color: var(--color-text); height: calc(100vh - 64px); max-height: calc(100vh - 64px);"
   >
     <!-- Header：標題 + 連結按鈕群 -->
     <header class="flex items-center justify-between gap-4 shrink-0 mb-4">

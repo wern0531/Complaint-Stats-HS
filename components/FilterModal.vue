@@ -2,7 +2,7 @@
   <BaseModal
     :model-value="modelValue"
     title="篩選條件"
-    content-max-width="max-w-lg"
+    content-max-width="sm:max-w-5xl"
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <SearchFilters

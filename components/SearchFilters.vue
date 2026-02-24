@@ -1,57 +1,29 @@
 <template>
-  <div class="search-filters-theme rounded-lg shadow-md p-6">
-    <h3 class="text-lg font-medium mb-4 filter-title">搜尋篩選</h3>
-    
-    <form @submit.prevent="handleSearch" class="space-y-4">
-      <!-- 縣市篩選 -->
+  <div class="search-filters-theme rounded-lg p-4">
+    <h3 class="text-base font-medium mb-3 filter-title">搜尋篩選</h3>
+    <form @submit.prevent="handleSearch" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2">
       <div>
-        <label class="block text-sm font-medium mb-2 filter-label">縣市</label>
-        <select 
-          v-model="filters.city" 
-          @change="applyFilters"
-          class="w-full px-3 py-2 rounded-lg filter-input"
-        >
+        <label class="block text-xs font-medium mb-1 filter-label">縣市</label>
+        <select v-model="filters.city" @change="applyFilters" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
           <option value="">全部縣市</option>
-          <option v-for="city in cityOptions" :key="city" :value="city">
-            {{ city }}
-          </option>
+          <option v-for="city in cityOptions" :key="city" :value="city">{{ city }}</option>
         </select>
       </div>
-
-      <!-- 產品篩選 -->
       <div>
-        <label class="block text-sm font-medium mb-2 filter-label">產品品項</label>
-        <input 
-          v-model="filters.product" 
-          @input="applyFilters"
-          type="text" 
-          placeholder="輸入產品品項關鍵字"
-          class="w-full px-3 py-2 rounded-lg filter-input"
-        />
+        <label class="block text-xs font-medium mb-1 filter-label">產品品項</label>
+        <input v-model="filters.product" @input="applyFilters" type="text" placeholder="關鍵字" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm" />
       </div>
-
-      <!-- 機台篩選 -->
       <div>
-        <label class="block text-sm font-medium mb-2 filter-label">製造機台</label>
-        <select 
-          v-model="filters.machine" 
-          @change="applyFilters"
-          class="w-full px-3 py-2 rounded-lg filter-input"
-        >
+        <label class="block text-xs font-medium mb-1 filter-label">製造機台</label>
+        <select v-model="filters.machine" @change="applyFilters" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
           <option value="">全部機台</option>
           <option value="P#15">P#15</option>
           <option value="P#13">P#13</option>
         </select>
       </div>
-
-      <!-- 通路篩選 -->
       <div>
-        <label class="block text-sm font-medium mb-2 filter-label">購買通路</label>
-        <select 
-          v-model="filters.channel" 
-          @change="applyFilters"
-          class="w-full px-3 py-2 rounded-lg filter-input"
-        >
+        <label class="block text-xs font-medium mb-1 filter-label">購買通路</label>
+        <select v-model="filters.channel" @change="applyFilters" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
           <option value="">全部通路</option>
           <option value="7-11">7-11</option>
           <option value="萊爾富">萊爾富</option>
@@ -64,81 +36,24 @@
           <option value="其他">其他</option>
         </select>
       </div>
-
-      <!-- 狀態篩選 -->
       <div>
-        <label class="block text-sm font-medium mb-2 filter-label">距離有效期限</label>
-        <select 
-          v-model="filters.status" 
-          @change="applyFilters"
-          class="w-full px-3 py-2 rounded-lg filter-input"
-        >
+        <label class="block text-xs font-medium mb-1 filter-label">距離有效期限</label>
+        <select v-model="filters.status" @change="applyFilters" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
           <option value="">全部狀態</option>
-          <option v-for="month in 13" :key="month-1" :value="month-1">
-            {{ month-1 }}月
-          </option>
+          <option v-for="month in 13" :key="month-1" :value="month-1">{{ month-1 }}月</option>
         </select>
       </div>
-
-      <!-- 日期範圍篩選 -->
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium mb-2 filter-label">開始日期</label>
-          <input 
-            v-model="filters.startDate" 
-            @change="applyFilters"
-            type="date" 
-            class="w-full px-3 py-2 rounded-lg filter-input"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2 filter-label">結束日期</label>
-          <input 
-            v-model="filters.endDate" 
-            @change="applyFilters"
-            type="date" 
-            class="w-full px-3 py-2 rounded-lg filter-input"
-          />
-        </div>
+      <div>
+        <label class="block text-xs font-medium mb-1 filter-label">開始日期</label>
+        <input v-model="filters.startDate" @change="applyFilters" type="date" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm" />
       </div>
-
-      <!-- 排序選項 -->
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium mb-2 filter-label">排序欄位</label>
-          <select 
-            v-model="filters.sortBy" 
-            @change="applyFilters"
-            class="w-full px-3 py-2 rounded-lg filter-input"
-          >
-            <option value="">預設排序</option>
-            <option value="complaintNumber">客訴編號</option>
-            <option value="productItem">產品品項</option>
-            <option value="city">縣市</option>
-            <option value="reactionTime">反映時間</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2 filter-label">排序方式</label>
-          <select 
-            v-model="filters.sortOrder" 
-            @change="applyFilters"
-            class="w-full px-3 py-2 rounded-lg filter-input"
-          >
-            <option value="asc">升序</option>
-            <option value="desc">降序</option>
-          </select>
-        </div>
+      <div>
+        <label class="block text-xs font-medium mb-1 filter-label">結束日期</label>
+        <input v-model="filters.endDate" @change="applyFilters" type="date" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm" />
       </div>
-
-      <!-- 按鈕區域 -->
-      <div class="flex space-x-3 pt-4">
-        <button type="button" @click="clearFilters" class="flex-1 px-4 py-2 text-sm font-medium rounded-lg btn-clear">
-          清除篩選
-        </button>
-        <button type="submit" class="flex-1 px-4 py-2 text-sm font-medium rounded-lg btn-submit">
-          搜尋
-        </button>
+      <div class="col-span-2 sm:col-span-3 lg:col-span-4 flex gap-2 pt-2">
+        <button type="button" @click="clearFilters" class="px-4 py-2 text-sm font-medium rounded-lg btn-clear">清除篩選</button>
+        <button type="submit" class="px-4 py-2 text-sm font-medium rounded-lg btn-submit">搜尋</button>
       </div>
     </form>
   </div>
@@ -155,8 +70,6 @@ interface SearchFilters {
   status?: string
   startDate?: string
   endDate?: string
-  sortBy?: string
-  sortOrder?: string
 }
 
 const emit = defineEmits<{
@@ -171,9 +84,7 @@ const filters = ref<SearchFilters>({
   channel: '',
   status: '',
   startDate: '',
-  endDate: '',
-  sortBy: '',
-  sortOrder: 'asc'
+  endDate: ''
 })
 
 // 縣市選項
@@ -199,9 +110,7 @@ const clearFilters = () => {
     channel: '',
     status: '',
     startDate: '',
-    endDate: '',
-    sortBy: '',
-    sortOrder: 'asc'
+    endDate: ''
   }
   applyFilters()
 }

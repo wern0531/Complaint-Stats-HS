@@ -1,39 +1,11 @@
 <template>
-  <div
-    v-if="isOpen"
-    class="fixed inset-0 z-50 overflow-y-auto"
-    aria-labelledby="modal-title"
-    role="dialog"
-    aria-modal="true"
+  <BaseModal
+    :model-value="isOpen"
+    :title="editData ? '編輯客訴' : '新增客訴'"
+    content-max-width="sm:max-w-2xl"
+    @update:model-value="$emit('close')"
   >
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <!-- 背景遮罩 -->
-      <div
-        class="modal-backdrop fixed inset-0 transition-opacity"
-        @click="$emit('close')"
-      ></div>
-
-      <!-- Modal 內容 -->
-      <div class="modal-content inline-block align-bottom rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-        <div class="modal-header px-6 py-4 border-b">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-medium modal-title" id="modal-title">
-              {{ editData ? '編輯客訴' : '新增客訴' }}
-            </h3>
-            <button
-              @click="$emit('close')"
-              type="button"
-              class="modal-close focus:outline-none"
-            >
-              <span class="sr-only">關閉</span>
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <form @submit.prevent="handleSubmit" class="p-6">
+    <form @submit.prevent="handleSubmit">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- 客訴編號 -->
             <div>
@@ -158,13 +130,12 @@
             </button>
           </div>
         </form>
-      </div>
-    </div>
-  </div>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
+import BaseModal from '~/components/common/BaseModal.vue'
 import type { Complaint } from '~/types/complaint'
 
 interface Props {
@@ -234,16 +205,10 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.modal-backdrop { background: rgba(0, 0, 0, 0.5); }
-.modal-content { background-color: var(--color-card); color: var(--color-text); }
-.modal-header { border-color: var(--color-border); background-color: var(--color-card); }
-.modal-title { color: var(--color-text); }
-.modal-close { color: var(--color-text-muted); }
-.modal-close:hover { opacity: 0.8; }
-.modal-content :deep(label) { color: var(--color-text-muted); }
-.modal-content :deep(input),
-.modal-content :deep(select),
-.modal-content :deep(textarea) {
+:deep(label) { color: var(--color-text-muted); }
+:deep(input),
+:deep(select),
+:deep(textarea) {
   background-color: var(--color-input-bg);
   border-color: var(--color-input-border);
   color: var(--color-text);

@@ -1,53 +1,52 @@
 <template>
   <Teleport to="body">
-    <Transition name="modal">
-      <div
-        v-if="modelValue"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="title"
-      >
-        <!-- 遮罩 -->
+    <div
+      v-if="modelValue"
+      class="fixed inset-0 z-50 overflow-y-auto"
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- 背景遮罩：與 ComplaintModal 一致 -->
         <div
-          class="absolute inset-0 bg-black/50"
+          class="modal-backdrop fixed inset-0 transition-opacity"
           aria-hidden="true"
           @click="close"
         />
-        <!-- 內容容器 -->
+
+        <!-- Modal 內容：圓角、陰影、標題列分隔線 -->
         <div
-          class="relative w-[95vw] max-h-[90vh] overflow-y-auto rounded-xl shadow-xl flex flex-col"
+          class="modal-content inline-block align-bottom rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full"
           :class="contentMaxWidth"
-          style="background-color: var(--color-card, #fff);"
           @click.stop
         >
-          <!-- 標題列 -->
-          <div
-            class="flex items-center justify-between shrink-0 px-5 py-4 border-b"
-            style="border-color: var(--color-border, #e5e7eb);"
-          >
-            <h2 class="text-lg font-semibold" style="color: var(--color-text);">
-              {{ title }}
-            </h2>
-            <button
-              type="button"
-              class="p-2 rounded-lg transition-colors hover:opacity-80"
-              style="color: var(--color-text-muted);"
-              aria-label="關閉"
-              @click="close"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+          <!-- Header：標題 + 關閉按鈕 -->
+          <div class="modal-header px-6 py-4 border-b">
+            <div class="flex justify-between items-center">
+              <h3 id="modal-title" class="text-lg font-medium modal-title">
+                {{ title }}
+              </h3>
+              <button
+                type="button"
+                class="modal-close focus:outline-none"
+                aria-label="關閉"
+                @click="close"
+              >
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
+
           <!-- 插槽內容 -->
-          <div class="flex-1 min-h-0 p-5">
+          <div class="p-6">
             <slot />
           </div>
         </div>
       </div>
-    </Transition>
+    </div>
   </Teleport>
 </template>
 
@@ -60,7 +59,7 @@ const props = withDefaults(
     title?: string
     contentMaxWidth?: string
   }>(),
-  { contentMaxWidth: 'max-w-2xl' }
+  { contentMaxWidth: 'sm:max-w-2xl', title: '' }
 )
 
 const emit = defineEmits<{
@@ -89,20 +88,24 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.2s ease;
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.5);
 }
-.modal-enter-active .relative,
-.modal-leave-active .relative {
-  transition: transform 0.2s ease;
+.modal-content {
+  background-color: var(--color-card);
+  color: var(--color-text);
 }
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
+.modal-header {
+  border-color: var(--color-border);
+  background-color: var(--color-card);
 }
-.modal-enter-from .relative,
-.modal-leave-to .relative {
-  transform: scale(0.95);
+.modal-title {
+  color: var(--color-text);
+}
+.modal-close {
+  color: var(--color-text-muted);
+}
+.modal-close:hover {
+  opacity: 0.8;
 }
 </style>

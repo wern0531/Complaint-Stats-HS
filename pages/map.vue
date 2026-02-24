@@ -25,7 +25,7 @@
 
       <!-- 主內容：地圖卡片 -->
       <section class="w-full flex justify-center flex-1 min-h-0">
-        <div class="w-full max-w-4xl bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col min-h-0">
+        <div class="w-[70%] min-w-[280px] mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col min-h-0">
           <div class="px-6 py-4 border-b border-gray-100 shrink-0">
             <h2 class="text-lg font-semibold text-gray-900">各縣市客訴熱力</h2>
           </div>
