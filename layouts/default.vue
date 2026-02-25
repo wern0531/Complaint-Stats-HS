@@ -72,8 +72,23 @@
         </NuxtLink>
       </nav>
 
-      <!-- 主題切換（側邊欄底部） -->
-      <div class="p-3 border-t" style="border-color: var(--sidebar-border);">
+      <!-- 登出 + 主題切換（側邊欄底部） -->
+      <div class="p-3 border-t space-y-2" style="border-color: var(--sidebar-border);">
+        <button
+          type="button"
+          @click="handleLogout"
+          class="logout-btn w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
+          style="
+            background-color: var(--color-bg-elevated);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+          "
+        >
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          登出
+        </button>
         <button
           type="button"
           @click="toggleTheme"
@@ -104,6 +119,12 @@
 
 <script setup lang="ts">
 const { theme, toggleTheme } = useTheme()
+const authToken = useCookie('auth_token')
+
+function handleLogout() {
+  authToken.value = null
+  navigateTo('/login')
+}
 </script>
 
 <style scoped>
@@ -114,5 +135,8 @@ const { theme, toggleTheme } = useTheme()
 .nav-link-active {
   background-color: var(--sidebar-active-bg);
   color: var(--sidebar-active-text);
+}
+.logout-btn:hover {
+  opacity: 0.9;
 }
 </style>

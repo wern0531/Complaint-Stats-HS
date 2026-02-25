@@ -55,9 +55,10 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td max-w-[200px] truncate">{{ complaint.consumerReactionPoint }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td max-w-[200px] truncate">{{ complaint.causeAnalysis || '未分析' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium table-td">
-              <div class="flex space-x-2">
-                <button @click="$emit('view-detail', complaint)" class="link-primary">查看詳情</button>
-                <button @click="$emit('edit-complaint', complaint)" class="link-secondary">編輯</button>
+              <div class="flex items-center gap-2">
+                <button type="button" @click="$emit('view-detail', complaint)" class="link-primary">查看詳情</button>
+                <button type="button" class="table-action-btn" aria-label="編輯" @click="$emit('edit', complaint)">✏️</button>
+                <button type="button" class="table-action-btn table-action-btn--danger" aria-label="刪除" @click="$emit('delete', complaint._id ?? complaint.id ?? '')">🗑️</button>
               </div>
             </td>
           </tr>
@@ -86,7 +87,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'view-detail': [complaint: Complaint]
-  'edit-complaint': [complaint: Complaint]
+  edit: [complaint: Complaint]
+  delete: [id: string]
   sort: [payload: { sortBy: string; sortOrder: SortOrder }]
 }>()
 
@@ -137,5 +139,17 @@ function formatReactionTime(value?: string): string {
 .link-primary:hover { text-decoration: underline; }
 .link-secondary { color: var(--color-accent); }
 .link-secondary:hover { text-decoration: underline; }
+.table-action-btn {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+.table-action-btn:hover { opacity: 0.85; }
+.table-action-btn--danger:hover { filter: brightness(0.95); }
 </style>
 

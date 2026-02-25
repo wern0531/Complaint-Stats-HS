@@ -1,6 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   nitro: {
+    // 僅在 Vercel 部署時使用 vercel preset，本地 dev 使用預設避免 503
+    preset: process.env.VERCEL ? 'vercel' : undefined,
     compatibilityDate: '2025-09-04'
   },
   devtools: { enabled: true },

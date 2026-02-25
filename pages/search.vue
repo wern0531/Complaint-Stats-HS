@@ -34,7 +34,8 @@
               :sort-by="sortBy"
               :sort-order="sortOrder"
               @view-detail="handleViewDetail"
-              @edit-complaint="handleEditComplaint"
+              @edit="handleEditComplaint"
+              @delete="handleDelete"
               @sort="handleSort"
             />
             <!-- 分頁 -->
@@ -199,15 +200,34 @@ const handleSort = (payload: { sortBy: string; sortOrder: 'asc' | 'desc' }) => {
 const handleSubmit = async (data: Partial<Complaint>) => {
   try {
     const isEdit = !!editData.value
-    const url = isEdit ? `/api/complaints/${editData.value?._id}` : '/api/complaints/add'
+    const docId = editData.value?._id ?? editData.value?.id
+    const url = isEdit ? `/api/complaints/${docId}` : '/api/complaints/add'
     const method = isEdit ? 'PUT' : 'POST'
     const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(res => res.json())
     if (response.success) {
-      await handleSearch({})
+      fetchList()
       closeModal()
+    } else {
+      console.error('提交失敗:', response.message)
     }
   } catch (e) {
     console.error('提交失敗:', e)
+  }
+}
+
+async function handleDelete(id: string) {
+  if (!id) return
+  const confirmed = confirm('確定要刪除這筆客訴嗎？刪除後無法復原。')
+  if (!confirmed) return
+  try {
+    const response = await fetch(`/api/complaints/${id}`, { method: 'DELETE' }).then(res => res.json())
+    if (response.success) {
+      await fetchList()
+    } else {
+      console.error('刪除失敗:', response.message)
+    }
+  } catch (e) {
+    console.error('刪除錯誤:', e)
   }
 }
 

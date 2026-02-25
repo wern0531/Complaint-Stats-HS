@@ -1,5 +1,7 @@
 // 客訴資料結構定義
 export interface Complaint {
+  /** Firestore 文件 ID（與 _id 同義，列表 API 回傳 _id） */
+  id?: string;
   _id?: string;
   complaintNumber: string;           // 客訴編號
   productItem: string;               // 產品品項
