@@ -72,14 +72,24 @@ export const transformToPieChartData = (
   }
 }
 
-// 縣市統計轉換為長條圖
-export const transformCityStatsToBarChart = (cityStats: Array<{ city: string; count: number }>) => {
-  return transformToBarChartData(cityStats, 'city', '縣市客訴統計')
+// 縣市統計轉換為長條圖（可選 limit：取前 N 筆，依 count 降序）
+export const transformCityStatsToBarChart = (
+  cityStats: Array<{ city: string; count: number }>,
+  limit?: number
+) => {
+  const sorted = [...(cityStats || [])].sort((a, b) => b.count - a.count)
+  const data = limit != null ? sorted.slice(0, limit) : sorted
+  return transformToBarChartData(data, 'city', '縣市客訴統計')
 }
 
-// 產品統計轉換為長條圖
-export const transformProductStatsToBarChart = (productStats: Array<{ product: string; count: number }>) => {
-  return transformToBarChartData(productStats, 'product', '產品客訴統計')
+// 產品統計轉換為長條圖（可選 limit：取前 N 筆，依 count 降序）
+export const transformProductStatsToBarChart = (
+  productStats: Array<{ product: string; count: number }>,
+  limit?: number
+) => {
+  const sorted = [...(productStats || [])].sort((a, b) => b.count - a.count)
+  const data = limit != null ? sorted.slice(0, limit) : sorted
+  return transformToBarChartData(data, 'product', '產品客訴統計')
 }
 
 // 機台統計轉換為長條圖
@@ -176,4 +186,60 @@ export const transformChannelStatsToHorizontalBar = (channelStats: Array<{ chann
 
 export const transformStatusStatsToHorizontalBar = (statusStats: Array<{ status: string; count: number }>) => {
   return transformToHorizontalBarChart(statusStats.slice(0, 8), 'status', '產品狀態')
+}
+
+// --- 進階統計：柏拉圖、效期、關鍵字 ---
+
+/** 柏拉圖 → 混合圖表用（長條：筆數；折線：累計%） */
+export const transformParetoToMixedChart = (pareto: { items: Array<{ item: string; count: number; cumulativePercentage: number }>; total: number }) => {
+  if (!pareto?.items?.length) return { labels: [] as string[], datasets: [] as unknown[] }
+  const labels = pareto.items.map(i => i.item)
+  const countData = pareto.items.map(i => i.count)
+  const percentData = pareto.items.map(i => i.cumulativePercentage)
+  return {
+    labels,
+    datasets: [
+      {
+        type: 'bar' as const,
+        label: '客訴筆數',
+        data: countData,
+        backgroundColor: CHART_COLORS[0] + '80',
+        borderColor: CHART_COLORS[0],
+        borderWidth: 1,
+        yAxisID: 'y'
+      },
+      {
+        type: 'line' as const,
+        label: '累計 %',
+        data: percentData,
+        borderColor: CHART_COLORS[1],
+        backgroundColor: CHART_COLORS[1] + '20',
+        fill: false,
+        tension: 0.3,
+        pointBackgroundColor: CHART_COLORS[1],
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1,
+        yAxisID: 'yPercent'
+      }
+    ]
+  }
+}
+
+/** 效期區間 → 長條圖（X：區間名稱，Y：筆數） */
+export const transformShelfLifeToBarChart = (shelfLife: { buckets: Array<{ bucket: string; count: number }>; total: number }) => {
+  if (!shelfLife?.buckets?.length) return { labels: [] as string[], datasets: [] as unknown[] }
+  const labels = shelfLife.buckets.map(b => b.bucket)
+  const data = shelfLife.buckets.map(b => b.count)
+  const backgroundColor = data.map((_, i) => CHART_COLORS[i % CHART_COLORS.length])
+  const borderColor = backgroundColor.map(c => c + '80')
+  return {
+    labels,
+    datasets: [{
+      label: '客訴筆數',
+      data,
+      backgroundColor,
+      borderColor,
+      borderWidth: 1
+    }]
+  }
 }

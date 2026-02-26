@@ -1,34 +1,43 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
+
 export default defineNuxtConfig({
   nitro: {
-    // 僅在 Vercel 部署時使用 vercel preset，本地 dev 使用預設避免 503
     preset: process.env.VERCEL ? 'vercel' : undefined,
     compatibilityDate: '2025-09-04'
   },
   devtools: { enabled: true },
   
-  // 模組設定
   modules: [
     '@nuxtjs/tailwindcss'
   ],
+
+  // 使用 alias 解決 Windows 下 xlsx 的載入問題
+  // 關鍵：將 'xlsx-fixed' 對應到實際檔案，避開 'xlsx' 關鍵字遞迴
+  alias: {
+    'xlsx-fixed': resolve(currentDir, 'node_modules/xlsx/dist/xlsx.full.min.js')
+  },
   
-  // 全域 CSS（主題變數需先載入）
+  build: {
+    transpile: ['xlsx', 'xlsx-fixed']
+  },
+  
   css: [
     '~/styles/theme.css',
     '~/styles/tailwind.css'
   ],
   
-  // PostCSS 設定
   postcss: {
     plugins: {
       autoprefixer: {}
     }
   },
 
-  // SSR 設定 - 改為 SPA 模式避免 SSR 問題
   ssr: false,
 
-  // 元資料設定
   app: {
     head: {
       title: '客訴統計搜尋工具',
@@ -40,14 +49,10 @@ export default defineNuxtConfig({
     }
   },
 
-  // 環境變數設定
   runtimeConfig: {
-    // 私有環境變數（僅在伺服器端可用）- Firebase Admin
     firebaseProjectId: process.env.FIREBASE_PROJECT_ID || '',
     firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL || '',
     firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY || '',
-
-    // 公開環境變數（客戶端也可用）
     public: {
       apiBase: '/api'
     }

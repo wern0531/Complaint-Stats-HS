@@ -69,7 +69,7 @@
           </div>
     </div>
 
-    <FilterModal v-model="filterModalOpen" @search="handleSearch" />
+    <FilterModal v-model="filterModalOpen" :initial-filters="lastFilters" @search="handleSearch" />
 
     <ComplaintModal :is-open="showModal" :edit-data="editData" @close="closeModal" @submit="handleSubmit" />
 
@@ -145,7 +145,7 @@ const filterSummary = computed(() => {
   if (f.startDate) parts.push(f.startDate)
   if (f.endDate) parts.push(f.endDate)
   if (f.city) parts.push(f.city)
-  if (f.product) parts.push(f.product)
+  if (f.product) parts.push(`關鍵字: ${f.product}`)
   if (f.channel) parts.push(f.channel)
   if (f.machine) parts.push(f.machine)
   if (!parts.length) return ''

@@ -6,31 +6,54 @@
         <p class="text-sm mt-1 page-subtitle">統計資料與圖表分析</p>
       </header>
 
+      <!-- 目前篩選標籤 + 一鍵清除 -->
+      <div v-if="hasActiveFilter" class="flex flex-wrap items-center gap-2 mb-4">
+        <span class="text-sm page-subtitle">目前篩選：</span>
+        <template v-for="tag in activeFilterTags" :key="tag.key">
+          <span
+            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-sm border cursor-pointer hover:opacity-90"
+            style="background-color: var(--color-bg-elevated); border-color: var(--color-border); color: var(--color-text);"
+            @click="removeFilter(tag.key)"
+          >
+            {{ tag.label }}
+            <span class="text-xs" aria-hidden="true">×</span>
+          </span>
+        </template>
+        <button
+          type="button"
+          class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium border"
+          style="border-color: var(--color-primary); color: var(--color-primary);"
+          @click="clearFilter"
+        >
+          清除全部篩選
+        </button>
+      </div>
+
       <!-- 篩選列 -->
       <div class="card p-5 mb-6">
         <h4 class="text-base font-semibold page-title mb-3">篩選條件</h4>
         <div class="flex flex-wrap items-center gap-4">
           <label class="flex items-center gap-2">
-            <input type="radio" v-model="selectedPeriod" value="all" @change="onPeriodChange" />
+            <input type="radio" v-model="filterState.period" value="all" @change="onPeriodChange" />
             <span class="text-sm page-title">全部客訴資料</span>
           </label>
           <label class="flex items-center gap-2">
-            <input type="radio" v-model="selectedPeriod" value="single" @change="onPeriodChange" />
+            <input type="radio" v-model="filterState.period" value="single" @change="onPeriodChange" />
             <span class="text-sm page-title">單月份</span>
-            <select v-model="selectedMonth" @change="updateStats" :disabled="selectedPeriod !== 'single'" class="input-style">
+            <select v-model="filterState.monthSingle" @change="updateStats" :disabled="filterState.period !== 'single'" class="input-style">
               <option value="">選擇月份</option>
               <option v-for="m in 12" :key="m" :value="String(m - 1)">{{ m - 1 }}月</option>
             </select>
           </label>
           <label class="flex items-center gap-2">
-            <input type="radio" v-model="selectedPeriod" value="range" @change="onPeriodChange" />
+            <input type="radio" v-model="filterState.period" value="range" @change="onPeriodChange" />
             <span class="text-sm page-title">月份範圍</span>
-            <select v-model="startMonth" @change="onRangeChange" :disabled="selectedPeriod !== 'range'" class="input-style">
+            <select v-model="filterState.monthStart" @change="onRangeChange" :disabled="filterState.period !== 'range'" class="input-style">
               <option value="">開始</option>
               <option v-for="m in 12" :key="m" :value="String(m - 1)">{{ m - 1 }}月</option>
             </select>
             <span class="page-subtitle">~</span>
-            <select v-model="endMonth" @change="onRangeChange" :disabled="selectedPeriod !== 'range'" class="input-style">
+            <select v-model="filterState.monthEnd" @change="onRangeChange" :disabled="filterState.period !== 'range'" class="input-style">
               <option value="">結束</option>
               <option v-for="m in 12" :key="m" :value="String(m - 1)">{{ m - 1 }}月</option>
             </select>
@@ -104,29 +127,87 @@
           </div>
         </div>
 
-        <!-- 縣市 / 機台：直條圖 -->
+        <!-- 縣市：大卡片顯示全部縣市，點擊卡片可開 modal -->
+        <section
+          class="card p-5 mb-6 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
+          @click="openChartModal('bar', cityChartDataFull, '縣市客訴統計')"
+        >
+          <h3 class="text-base font-semibold page-title mb-4">縣市客訴統計</h3>
+          <p class="text-xs page-subtitle mb-2">點擊長條可篩選該縣市；點擊卡片可放大檢視</p>
+          <BarChart
+            :data="cityChartDataFull"
+            title=""
+            height="260px"
+            @bar-click="onCityBarClick"
+          />
+        </section>
+
+        <!-- 產品統計：依機台分開，P#15 / P#13 並排，樣式一致 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div
-            class="card p-5 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
-            @click="openChartModal('bar', cityChartData, '縣市客訴統計')"
+            class="card p-5 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95 machine-chart-card"
+            @click="openChartModal('bar', p15ChartDataFull, '機台 P#15 產品客訴統計（完整）')"
           >
-            <h3 class="text-base font-semibold page-title mb-4">縣市客訴統計</h3>
+            <h3 class="text-base font-semibold page-title mb-4">機台 P#15 產品客訴統計</h3>
+            <p class="text-xs page-subtitle mb-2">前 5 名產品，點擊長條可篩選；點擊卡片可看完整列表</p>
             <BarChart
-              :data="cityChartData"
+              :data="p15ChartDataTop5"
+              title=""
+              height="260px"
+              @bar-click="onProductBarClick"
+            />
+          </div>
+          <div
+            class="card p-5 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95 machine-chart-card"
+            @click="openChartModal('bar', p13ChartDataFull, '機台 P#13 產品客訴統計（完整）')"
+          >
+            <h3 class="text-base font-semibold page-title mb-4">機台 P#13 產品客訴統計</h3>
+            <p class="text-xs page-subtitle mb-2">前 5 名產品，點擊長條可篩選；點擊卡片可看完整列表</p>
+            <BarChart
+              :data="p13ChartDataTop5"
+              title=""
+              height="260px"
+              @bar-click="onProductBarClick"
+            />
+          </div>
+        </div>
+
+        <!-- 進階分析：柏拉圖、效期、關鍵字 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="card p-5">
+            <h3 class="text-base font-semibold page-title mb-4">產品品項柏拉圖</h3>
+            <p class="text-xs page-subtitle mb-2">長條：客訴筆數；折線：累計百分比</p>
+            <ParetoChart
+              :data="paretoProductChartData"
+              title=""
+              height="280px"
+            />
+          </div>
+          <div class="card p-5">
+            <h3 class="text-base font-semibold page-title mb-4">原因分析柏拉圖</h3>
+            <p class="text-xs page-subtitle mb-2">長條：客訴筆數；折線：累計百分比</p>
+            <ParetoChart
+              :data="paretoCauseChartData"
+              title=""
+              height="280px"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="card p-5">
+            <h3 class="text-base font-semibold page-title mb-4">效期分布（距到期時間）</h3>
+            <p class="text-xs page-subtitle mb-2">以反映時間為基準，產品剩餘效期區間</p>
+            <ShelfLifeChart
+              :data="shelfLifeChartData"
               title=""
               height="260px"
             />
           </div>
-          <div
-            class="card p-5 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
-            @click="openChartModal('bar', productChartData, '產品客訴統計')"
-          >
-            <h3 class="text-base font-semibold page-title mb-4">產品客訴統計</h3>
-            <BarChart
-              :data="productChartData"
-              title=""
-              height="260px"
-            />
+          <div class="card p-5">
+            <h3 class="text-base font-semibold page-title mb-4">原因分析關鍵字（前 20）</h3>
+            <p class="text-xs page-subtitle mb-2">字體大小依出現次數比例</p>
+            <KeywordList :keywords="keywordListItems" />
           </div>
         </div>
 
@@ -187,36 +268,71 @@ import {
   transformProductStatsToBarChart,
   transformMonthlyStatsToLineChart,
   transformChannelStatsToHorizontalBar,
-  transformStatusStatsToHorizontalBar
+  transformStatusStatsToHorizontalBar,
+  transformParetoToMixedChart,
+  transformShelfLifeToBarChart
 } from '~/utils/chartDataTransformer'
+import ParetoChart from '~/components/ParetoChart.vue'
+import ShelfLifeChart from '~/components/ShelfLifeChart.vue'
+import KeywordList from '~/components/KeywordList.vue'
+import { useComplaintFilter } from '~/composables/useComplaintFilter'
 
 useHead({ title: '分析圖表 - 客訴統計搜尋工具' })
 
+const {
+  filterState,
+  setFilter,
+  clearFilter,
+  hasActiveFilter,
+  apiParams,
+  activeFilterTags,
+  removeFilter
+} = useComplaintFilter()
+
 const statsLoading = ref(false)
-const selectedPeriod = ref<'all' | 'single' | 'range'>('all')
-const selectedMonth = ref('')
-const startMonth = ref('')
-const endMonth = ref('')
 const statsData = ref<{
   total?: number
   cityStats?: Array<{ city: string; count: number }>
   productStats?: Array<{ product: string; count: number }>
+  productStatsByMachine?: Record<string, Array<{ product: string; count: number }>>
   channelStats?: Array<{ channel: string; count: number }>
   statusStats?: Array<{ status: string; count: number }>
   monthlyStats?: Array<{ month: string; count: number }>
+  paretoProduct?: { items: Array<{ item: string; count: number; cumulativePercentage: number }>; total: number }
+  paretoCause?: { items: Array<{ item: string; count: number; cumulativePercentage: number }>; total: number }
+  shelfLife?: { buckets: Array<{ bucket: string; count: number }>; total: number }
+  keywordStats?: { keywords: Array<{ keyword: string; count: number }> }
 }>({})
 
 const monthlyChartData = computed(() => {
   if (!statsData.value?.monthlyStats?.length) return { labels: [], datasets: [] }
   return transformMonthlyStatsToLineChart(statsData.value.monthlyStats)
 })
-const cityChartData = computed(() => {
-  if (!statsData.value?.cityStats) return { labels: [], datasets: [] }
+const emptyChartData = { labels: [] as string[], datasets: [] as unknown[] }
+
+const cityChartDataFull = computed(() => {
+  if (!statsData.value?.cityStats) return emptyChartData
   return transformCityStatsToBarChart(statsData.value.cityStats)
 })
-const productChartData = computed(() => {
-  if (!statsData.value?.productStats) return { labels: [], datasets: [] }
-  return transformProductStatsToBarChart(statsData.value.productStats)
+
+const p15Stats = computed(() => statsData.value?.productStatsByMachine?.['P#15'] ?? [])
+const p13Stats = computed(() => statsData.value?.productStatsByMachine?.['P#13'] ?? [])
+
+const p15ChartDataTop5 = computed(() => {
+  if (!p15Stats.value.length) return emptyChartData
+  return transformProductStatsToBarChart(p15Stats.value, 5)
+})
+const p15ChartDataFull = computed(() => {
+  if (!p15Stats.value.length) return emptyChartData
+  return transformProductStatsToBarChart(p15Stats.value)
+})
+const p13ChartDataTop5 = computed(() => {
+  if (!p13Stats.value.length) return emptyChartData
+  return transformProductStatsToBarChart(p13Stats.value, 5)
+})
+const p13ChartDataFull = computed(() => {
+  if (!p13Stats.value.length) return emptyChartData
+  return transformProductStatsToBarChart(p13Stats.value)
 })
 const channelBarData = computed(() => {
   if (!statsData.value?.channelStats) return { labels: [], datasets: [] }
@@ -227,10 +343,33 @@ const statusBarData = computed(() => {
   return transformStatusStatsToHorizontalBar(statsData.value.statusStats)
 })
 
+const paretoProductChartData = computed(() => {
+  if (!statsData.value?.paretoProduct?.items?.length) return { labels: [], datasets: [] }
+  return transformParetoToMixedChart(statsData.value.paretoProduct)
+})
+const paretoCauseChartData = computed(() => {
+  if (!statsData.value?.paretoCause?.items?.length) return { labels: [], datasets: [] }
+  return transformParetoToMixedChart(statsData.value.paretoCause)
+})
+const shelfLifeChartData = computed(() => {
+  if (!statsData.value?.shelfLife?.buckets?.length) return { labels: [], datasets: [] }
+  return transformShelfLifeToBarChart(statsData.value.shelfLife)
+})
+const keywordListItems = computed(() => statsData.value?.keywordStats?.keywords ?? [])
+
 function getFilterLabel() {
-  if (selectedPeriod.value === 'single' && selectedMonth.value !== '') return `${selectedMonth.value}月`
-  if (selectedPeriod.value === 'range' && startMonth.value !== '' && endMonth.value !== '') return `${startMonth.value}月 ~ ${endMonth.value}月`
+  const s = filterState.value
+  if (s.period === 'single' && s.monthSingle !== '') return `${s.monthSingle}月`
+  if (s.period === 'range' && s.monthStart !== '' && s.monthEnd !== '') return `${s.monthStart}月 ~ ${s.monthEnd}月`
   return '全部'
+}
+
+function onCityBarClick(label: string) {
+  setFilter({ city: label })
+}
+
+function onProductBarClick(label: string) {
+  setFilter({ product: label })
 }
 
 const chartModalOpen = ref(false)
@@ -263,13 +402,7 @@ function getCityColor(cityName: string) {
 async function updateStats() {
   statsLoading.value = true
   try {
-    const params: Record<string, string> = {}
-    if (selectedPeriod.value === 'single' && selectedMonth.value !== '') params.month = selectedMonth.value
-    if (selectedPeriod.value === 'range' && startMonth.value !== '' && endMonth.value !== '') {
-      const s = parseInt(startMonth.value)
-      const e = parseInt(endMonth.value)
-      if (s <= e) params.month = `${s}~${e}`
-    }
+    const params = { ...apiParams.value }
     const qs = new URLSearchParams(params).toString()
     const res = await fetch(`/api/complaints/stats?${qs}`).then(r => r.json())
     if (res.success) statsData.value = res.data
@@ -281,14 +414,21 @@ async function updateStats() {
 }
 
 function onPeriodChange() {
-  if (selectedPeriod.value !== 'single') selectedMonth.value = ''
-  if (selectedPeriod.value !== 'range') { startMonth.value = ''; endMonth.value = '' }
+  const s = filterState.value
+  if (s.period !== 'single') filterState.value.monthSingle = ''
+  if (s.period !== 'range') {
+    filterState.value.monthStart = ''
+    filterState.value.monthEnd = ''
+  }
   updateStats()
 }
 
 function onRangeChange() {
-  if (startMonth.value && endMonth.value) updateStats()
+  const s = filterState.value
+  if (s.monthStart && s.monthEnd) updateStats()
 }
+
+watch(apiParams, () => updateStats(), { deep: true })
 
 onMounted(updateStats)
 </script>
@@ -308,4 +448,9 @@ onMounted(updateStats)
 .table-row { border-bottom: 1px solid var(--color-border); }
 .table-row:hover { background-color: var(--color-bg-elevated); }
 .table-td { padding: 0.75rem 1.5rem; font-size: 0.875rem; color: var(--color-text); }
+/* P#15 / P#13 機台卡片一致高度與版面 */
+.machine-chart-card { min-height: 340px; display: flex; flex-direction: column; }
+.machine-chart-card h3 { flex-shrink: 0; }
+.machine-chart-card p { flex-shrink: 0; }
+.machine-chart-card .chart-wrapper { flex: 1; min-height: 260px; }
 </style>

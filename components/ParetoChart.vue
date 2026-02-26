@@ -10,67 +10,56 @@
 import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
 
-// 註冊 Chart.js 組件
 Chart.register(...registerables)
 
-interface ChartData {
+interface ParetoChartData {
   labels: string[]
-  datasets: {
+  datasets: Array<{
+    type: 'bar' | 'line'
     label: string
     data: number[]
-    backgroundColor: string[]
-    borderColor: string[]
-    borderWidth: number
-  }[]
+    yAxisID: string
+    backgroundColor?: string
+    borderColor?: string
+    borderWidth?: number
+    fill?: boolean
+    tension?: number
+    pointBackgroundColor?: string
+    pointBorderColor?: string
+    pointBorderWidth?: number
+  }>
 }
 
 interface Props {
-  data: ChartData
+  data: ParetoChartData
   title?: string
   height?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: '統計圖表',
-  height: '400px'
+  title: '柏拉圖分析',
+  height: '320px'
 })
-
-const emit = defineEmits<{ barClick: [label: string] }>()
 
 const chartCanvas = ref<HTMLCanvasElement>()
 let chart: Chart | null = null
 
-// 創建圖表
 const createChart = () => {
-  if (!chartCanvas.value) return
-
+  if (!chartCanvas.value || !props.data?.labels?.length) return
   const ctx = chartCanvas.value.getContext('2d')
   if (!ctx) return
-
-  // 銷毀舊圖表
-  if (chart) {
-    chart.destroy()
-  }
+  if (chart) chart.destroy()
 
   const isDark = import.meta.client && document.documentElement.getAttribute('data-theme') === 'dark'
   const textColor = isDark ? '#cbd5e1' : '#475569'
   const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+
   chart = new Chart(ctx, {
     type: 'bar',
     data: props.data,
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      onClick: (evt, elements, chartInstance) => {
-        if (elements.length > 0 && chartInstance.data.labels) {
-          const idx = elements[0].index
-          const label = chartInstance.data.labels[idx]
-          if (typeof label === 'string') {
-            ;(evt as { native?: MouseEvent }).native?.stopPropagation?.()
-            emit('barClick', label)
-          }
-        }
-      },
       plugins: {
         title: {
           display: !!props.title,
@@ -85,61 +74,44 @@ const createChart = () => {
         },
         tooltip: {
           callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y} 筆`
+            label: (ctx) => {
+              if (ctx.dataset.yAxisID === 'yPercent') return `${ctx.dataset.label}: ${ctx.parsed.y}%`
+              return `${ctx.dataset.label}: ${ctx.parsed.y} 筆`
+            }
           }
         }
       },
       scales: {
         x: {
           grid: { color: gridColor },
-          ticks: { color: textColor }
+          ticks: { color: textColor, maxRotation: 45 }
         },
         y: {
+          type: 'linear',
+          position: 'left',
           beginAtZero: true,
           grid: { color: gridColor },
-          ticks: {
-            color: textColor,
-            stepSize: 1,
-            precision: 0,
-            callback: function (value) {
-              return typeof value === 'number' ? value.toLocaleString() : value
-            }
-          }
+          ticks: { color: textColor, callback: (v) => (typeof v === 'number' ? v.toLocaleString() : v) }
+        },
+        yPercent: {
+          type: 'linear',
+          position: 'right',
+          min: 0,
+          max: 100,
+          grid: { drawOnChartArea: false },
+          ticks: { color: textColor, callback: (v) => (typeof v === 'number' ? `${v}%` : v) }
         }
       }
     }
   })
 }
 
-// 監聽數據變化
-watch(() => props.data, () => {
-  nextTick(() => {
-    createChart()
-  })
-}, { deep: true })
-
-// 組件掛載時創建圖表
-onMounted(() => {
-  createChart()
-})
-
-// 組件卸載時清理
-onUnmounted(() => {
-  if (chart) {
-    chart.destroy()
-  }
-})
+watch(() => [props.data, props.title], () => nextTick(createChart), { deep: true })
+onMounted(createChart)
+onUnmounted(() => { if (chart) chart.destroy() })
 </script>
 
 <style scoped>
-.chart-wrapper {
-  position: relative;
-  width: 100%;
-}
-.chart-container {
-  position: relative;
-  height: v-bind(height);
-  width: 100%;
-}
+.chart-wrapper { position: relative; width: 100%; }
+.chart-container { position: relative; height: v-bind(height); width: 100%; }
 </style>
-

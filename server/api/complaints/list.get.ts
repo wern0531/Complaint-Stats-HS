@@ -64,13 +64,11 @@ export default defineEventHandler(async (event) => {
 
     let q: Query = db.collection(COMPLAINTS_COLLECTION)
 
-    // Firestore 等式篩選（不傳「全部」才加條件）；縣市用簡稱以對應 Firestore（例：台中市→台中）
+    // 縣市、機台、通路、狀態：單選，可同時使用（例：台北市 + 7-11）
     if (filters.city && filters.city !== '全部') {
       q = q.where('city', '==', normalizeCityForQuery(filters.city))
     }
-    if (filters.product && filters.product !== '全部') {
-      q = q.where('productItem', '==', filters.product)
-    }
+    // 產品關鍵字改為「名稱包含」比對，在取得資料後於記憶體篩選（Firestore 不支援 string contains）
     if (filters.machine && filters.machine !== '全部') {
       q = q.where('manufacturingMachine', '==', filters.machine)
     }
@@ -115,6 +113,15 @@ export default defineEventHandler(async (event) => {
           return complaintMonth === month
         })
       }
+    }
+
+    // 產品品項關鍵字：名稱包含即符合（不區分大小寫，例：奶茶 → 奶茶吐司、鮮奶茶 等）
+    const productKeyword = (filters.product || '').trim()
+    if (productKeyword) {
+      const lower = productKeyword.toLowerCase()
+      filteredComplaints = filteredComplaints.filter((c) =>
+        (c.productItem || '').toLowerCase().includes(lower)
+      )
     }
 
     // 排序（記憶體排序以支援任意欄位）

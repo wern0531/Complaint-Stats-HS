@@ -6,6 +6,8 @@
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <SearchFilters
+      :initial-filters="initialFilters"
+      :modal-open="modelValue"
       @search="onSearch"
     />
   </BaseModal>
@@ -17,6 +19,7 @@ import SearchFilters from '~/components/SearchFilters.vue'
 
 defineProps<{
   modelValue: boolean
+  initialFilters?: Record<string, string>
 }>()
 
 const emit = defineEmits<{

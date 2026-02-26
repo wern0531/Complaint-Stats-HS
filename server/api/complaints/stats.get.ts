@@ -1,4 +1,4 @@
-import type { Complaint } from '~/types/complaint'
+import type { Complaint, ParetoStats, ShelfLifeStats, KeywordStats } from '~/types/complaint'
 import { getFirebaseAdmin } from '~/server/utils/firebase'
 import { toIsoString, toReactionTimeString, toNumberOrString } from '~/server/utils/firestore-helpers'
 import type { Query } from 'firebase-admin/firestore'
@@ -63,6 +63,158 @@ function docToComplaint(id: string, data: Record<string, unknown>): Complaint {
   }
 }
 
+// --- 日期與數值輔助（用於效期與結案天數） ---
+/** 解析 YYYYMMDD 或 YYMMDD 為 Date */
+function parseYmd(s: string): Date | null {
+  if (!s || typeof s !== 'string') return null
+  const raw = s.replace(/\D/g, '')
+  if (raw.length === 8) {
+    const y = parseInt(raw.slice(0, 4), 10)
+    const m = parseInt(raw.slice(4, 6), 10) - 1
+    const d = parseInt(raw.slice(6, 8), 10)
+    const date = new Date(y, m, d)
+    if (isNaN(date.getTime())) return null
+    return date
+  }
+  if (raw.length === 6) {
+    const y = 2000 + parseInt(raw.slice(0, 2), 10)
+    const m = parseInt(raw.slice(2, 4), 10) - 1
+    const d = parseInt(raw.slice(4, 6), 10)
+    const date = new Date(y, m, d)
+    if (isNaN(date.getTime())) return null
+    return date
+  }
+  return null
+}
+
+/** 解析 ISO 字串或 YYYYMMDD */
+function parseDate(value: string | undefined): Date | null {
+  if (!value) return null
+  if (value.includes('T') || value.includes('-')) {
+    const d = new Date(value)
+    return isNaN(d.getTime()) ? null : d
+  }
+  return parseYmd(value)
+}
+
+function daysBetween(from: Date, to: Date): number {
+  const ms = to.getTime() - from.getTime()
+  return Math.floor(ms / (24 * 60 * 60 * 1000))
+}
+
+// --- 柏拉圖：依 key 聚合後算累計百分比，依 count 降序 ---
+function buildPareto(
+  complaints: Complaint[],
+  getKey: (c: Complaint) => string,
+  fallbackLabel: string
+): ParetoStats {
+  const countByKey = new Map<string, number>()
+  for (const c of complaints) {
+    const key = getKey(c) || fallbackLabel
+    countByKey.set(key, (countByKey.get(key) ?? 0) + 1)
+  }
+  const sorted = Array.from(countByKey.entries())
+    .map(([item, count]) => ({ item, count }))
+    .sort((a, b) => b.count - a.count)
+  const total = complaints.length
+  let cum = 0
+  const items = sorted.map(({ item, count }) => {
+    cum += count
+    return {
+      item,
+      count,
+      cumulativePercentage: total > 0 ? Math.round((cum / total) * 10000) / 100 : 0
+    }
+  })
+  return { items, total }
+}
+
+// --- 效期區間：以反映日為基準，計算距到期日天數並分桶 ---
+const SHELF_LIFE_BUCKETS: Array<{ label: string; minDays: number; maxDays: number | null }> = [
+  { label: '已過期', minDays: -Infinity, maxDays: -1 },
+  { label: '0-3 個月內到期', minDays: 0, maxDays: 90 },
+  { label: '3-6 個月內到期', minDays: 91, maxDays: 180 },
+  { label: '6-12 個月內到期', minDays: 181, maxDays: 365 },
+  { label: '12 個月以上', minDays: 366, maxDays: null }
+]
+
+function buildShelfLifeStats(complaints: Complaint[]): ShelfLifeStats {
+  const bucketCounts = new Map<string, number>()
+  for (const b of SHELF_LIFE_BUCKETS) bucketCounts.set(b.label, 0)
+  let valid = 0
+  for (const c of complaints) {
+    const reaction = parseYmd(c.reactionTime)
+    const expiry = parseDate(c.expiryDate) ?? parseYmd(c.expiryDate)
+    if (!reaction || !expiry) continue
+    const daysLeft = daysBetween(reaction, expiry)
+    valid++
+    for (const b of SHELF_LIFE_BUCKETS) {
+      const inRange = b.maxDays === null
+        ? daysLeft >= b.minDays
+        : daysLeft >= b.minDays && daysLeft <= b.maxDays
+      if (inRange) {
+        bucketCounts.set(b.label, (bucketCounts.get(b.label) ?? 0) + 1)
+        break
+      }
+    }
+  }
+  const buckets = SHELF_LIFE_BUCKETS.map(b => ({
+    bucket: b.label,
+    count: bucketCounts.get(b.label) ?? 0
+  }))
+  return { buckets, total: valid }
+}
+
+// --- 結案天數 KPI：reactionTime 到 updatedAt 的平均天數 ---
+function buildResolutionTimeDays(complaints: Complaint[]): number | null {
+  let sum = 0
+  let n = 0
+  for (const c of complaints) {
+    const start = parseYmd(c.reactionTime)
+    const end = parseDate(c.updatedAt)
+    if (!start || !end) continue
+    const days = daysBetween(start, end)
+    if (days >= 0) {
+      sum += days
+      n++
+    }
+  }
+  if (n === 0) return null
+  return Math.round((sum / n) * 10) / 10
+}
+
+// --- 關鍵字頻率：從 causeAnalysis 切詞，排除停用詞，取前 20 ---
+const STOP_WORDS = new Set([
+  '的', '了', '是', '在', '有', '与', '及', '等', '和', '或', '不', '也', '就', '都', '而', '被', '把', '让', '给', '为', '以',
+  '与', '若', '如', '但', '因', '此', '由', '从', '到', '之', '未', '无', '没有', '可能', '可以', '进行', '相关', '问题', '分析', '原因',
+  '與', '及', '等', '或', '和', '之', '與', '或', '若', '如', '但', '因', '此', '由', '從', '到', '未', '無', '沒有', '可能', '可以', '進行', '相關', '問題', '分析', '原因',
+  'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can'
+])
+
+function buildKeywordStats(complaints: Complaint[], topN: number = 20): KeywordStats {
+  const freq = new Map<string, number>()
+  const tokenize = (text: string): string[] => {
+    return text
+      .replace(/[^\w\u4e00-\u9fff]+/g, ' ')
+      .split(/\s+/)
+      .map(s => s.trim())
+      .filter(s => s.length >= 2 && !STOP_WORDS.has(s))
+  }
+  for (const c of complaints) {
+    const text = (c.causeAnalysis || '').trim()
+    if (!text) continue
+    const tokens = tokenize(text)
+    for (const t of tokens) {
+      freq.set(t, (freq.get(t) ?? 0) + 1)
+    }
+  }
+  const keywords = Array.from(freq.entries())
+    .map(([keyword, count]) => ({ keyword, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, topN)
+  return { keywords }
+}
+
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
 
@@ -70,8 +222,6 @@ export default defineEventHandler(async (event) => {
     const { db } = getFirebaseAdmin(event)
     let q: Query = db.collection(COMPLAINTS_COLLECTION)
 
-    // 依 yearMonth 或 month 建立 Firestore 日期範圍查詢（可選）
-    // Firestore 若 reactionTime 存成 number，查詢也用 number
     if (query.yearMonth) {
       const yearMonthFilter = query.yearMonth as string
       if (yearMonthFilter.includes('~')) {
@@ -92,14 +242,7 @@ export default defineEventHandler(async (event) => {
         q = q.where('reactionTime', '>=', parseInt(startStr, 10)).where('reactionTime', '<=', parseInt(endStr, 10))
       }
     } else if (query.month) {
-      const monthFilter = query.month as string
-      if (monthFilter.includes('~')) {
-        const [startMonth, endMonth] = monthFilter.split('~').map((m) => parseInt(m, 10))
-        // 月份範圍無法單用 Firestore 表示，先取一筆大範圍再於記憶體篩選
-        q = q.limit(MAX_FIRESTORE_READ)
-      } else {
-        q = q.limit(MAX_FIRESTORE_READ)
-      }
+      q = q.limit(MAX_FIRESTORE_READ)
     }
 
     q = q.limit(MAX_FIRESTORE_READ)
@@ -108,7 +251,6 @@ export default defineEventHandler(async (event) => {
       docToComplaint(doc.id, doc.data() as Record<string, unknown>)
     )
 
-    // month 篩選（僅 month 參數時在記憶體做二次過濾）
     if (query.month && !query.yearMonth) {
       const monthFilter = query.month as string
       if (monthFilter.includes('~')) {
@@ -132,7 +274,6 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // 依 query 在記憶體篩選：縣市、產品、機台、通路（供地圖頁與統計篩選）
     const filterCity = (query.city as string)?.trim()
     const filterProduct = (query.product as string)?.trim()
     const filterMachine = (query.machine as string)?.trim()
@@ -155,20 +296,20 @@ export default defineEventHandler(async (event) => {
       complaints = complaints.filter((c) => normalizeChannel(c.purchaseChannel) === filterChannel)
     }
 
-    // 縣市統計
+    const totalCount = complaints.length
+
     const cityMap = new Map<string, number>()
-    complaints.forEach((complaint) => {
-      const city = complaint.city || '未分類'
+    complaints.forEach((c) => {
+      const city = c.city || '未分類'
       cityMap.set(city, (cityMap.get(city) || 0) + 1)
     })
     const cityStats = Array.from(cityMap.entries())
       .map(([city, count]) => ({ city, count }))
       .sort((a, b) => b.count - a.count)
 
-    // 產品品項統計
     const productMap = new Map<string, number>()
-    complaints.forEach((complaint) => {
-      const product = complaint.productItem || '未分類'
+    complaints.forEach((c) => {
+      const product = c.productItem || '未分類'
       productMap.set(product, (productMap.get(product) || 0) + 1)
     })
     const productStats = Array.from(productMap.entries())
@@ -176,40 +317,52 @@ export default defineEventHandler(async (event) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
 
-    // 製造機台統計
+    // 依製造機台分組的產品統計：machine -> [{ product, count }]，依 count 降序
+    const productByMachine = new Map<string, Map<string, number>>()
+    complaints.forEach((c) => {
+      const machine = c.manufacturingMachine || '未分類'
+      const product = c.productItem || '未分類'
+      if (!productByMachine.has(machine)) productByMachine.set(machine, new Map())
+      const pm = productByMachine.get(machine)!
+      pm.set(product, (pm.get(product) || 0) + 1)
+    })
+    const productStatsByMachine: Record<string, Array<{ product: string; count: number }>> = {}
+    productByMachine.forEach((pm, machine) => {
+      productStatsByMachine[machine] = Array.from(pm.entries())
+        .map(([product, count]) => ({ product, count }))
+        .sort((a, b) => b.count - a.count)
+    })
+
     const machineMap = new Map<string, number>()
-    complaints.forEach((complaint) => {
-      const machine = complaint.manufacturingMachine || '未分類'
+    complaints.forEach((c) => {
+      const machine = c.manufacturingMachine || '未分類'
       machineMap.set(machine, (machineMap.get(machine) || 0) + 1)
     })
     const machineStats = Array.from(machineMap.entries())
       .map(([machine, count]) => ({ machine, count }))
       .sort((a, b) => b.count - a.count)
 
-    // 購買通路統計（保留 normalizeChannel）
     const channelMap = new Map<string, number>()
-    complaints.forEach((complaint) => {
-      const normalizedChannel = normalizeChannel(complaint.purchaseChannel)
-      channelMap.set(normalizedChannel, (channelMap.get(normalizedChannel) || 0) + 1)
+    complaints.forEach((c) => {
+      const ch = normalizeChannel(c.purchaseChannel)
+      channelMap.set(ch, (channelMap.get(ch) || 0) + 1)
     })
     const channelStats = Array.from(channelMap.entries())
       .map(([channel, count]) => ({ channel, count }))
       .sort((a, b) => b.count - a.count)
 
-    // 產品狀態統計
     const statusMap = new Map<string, number>()
-    complaints.forEach((complaint) => {
-      const status = complaint.productStatus || '未分類'
+    complaints.forEach((c) => {
+      const status = c.productStatus || '未分類'
       statusMap.set(status, (statusMap.get(status) || 0) + 1)
     })
     const statusStats = Array.from(statusMap.entries())
       .map(([status, count]) => ({ status, count }))
       .sort((a, b) => b.count - a.count)
 
-    // 異常原因分析
     const causeMap = new Map<string, number>()
-    complaints.forEach((complaint) => {
-      const cause = complaint.causeAnalysis || '未分類'
+    complaints.forEach((c) => {
+      const cause = c.causeAnalysis || '未分類'
       causeMap.set(cause, (causeMap.get(cause) || 0) + 1)
     })
     const causeStats = Array.from(causeMap.entries())
@@ -217,21 +370,23 @@ export default defineEventHandler(async (event) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
 
-    // 近 12 個月客訴數量
     const monthMap = new Map<string, number>()
-    complaints.forEach((complaint) => {
-      if (complaint.reactionTime && typeof complaint.reactionTime === 'string' && complaint.reactionTime.length >= 6) {
-        const ym = `${complaint.reactionTime.slice(0, 4)}-${complaint.reactionTime.slice(4, 6)}`
+    complaints.forEach((c) => {
+      if (c.reactionTime && typeof c.reactionTime === 'string' && c.reactionTime.length >= 6) {
+        const ym = `${c.reactionTime.slice(0, 4)}-${c.reactionTime.slice(4, 6)}`
         monthMap.set(ym, (monthMap.get(ym) || 0) + 1)
       }
     })
     const sortedMonths = Array.from(monthMap.entries())
       .map(([month, count]) => ({ month, count }))
       .sort((a, b) => a.month.localeCompare(b.month))
-    const last12 = sortedMonths.slice(-12)
-    const monthlyStats = last12.length > 0 ? last12 : []
+    const monthlyStats = sortedMonths.slice(-12)
 
-    const totalCount = complaints.length
+    const paretoProduct = buildPareto(complaints, c => c.productItem || '', '未分類')
+    const paretoCause = buildPareto(complaints, c => c.causeAnalysis || '', '未分類')
+    const shelfLife = buildShelfLifeStats(complaints)
+    const resolutionTimeDays = buildResolutionTimeDays(complaints)
+    const keywordStats = buildKeywordStats(complaints, 20)
 
     return {
       success: true,
@@ -239,11 +394,17 @@ export default defineEventHandler(async (event) => {
         total: totalCount,
         cityStats,
         productStats,
+        productStatsByMachine,
         machineStats,
         channelStats,
         statusStats,
         causeStats,
-        monthlyStats
+        monthlyStats,
+        paretoProduct,
+        paretoCause,
+        shelfLife,
+        resolutionTimeDays,
+        keywordStats
       }
     }
   } catch (error) {

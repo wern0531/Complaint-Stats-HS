@@ -4,18 +4,23 @@
     <form @submit.prevent="handleSearch" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2">
       <div>
         <label class="block text-xs font-medium mb-1 filter-label">縣市</label>
-        <select v-model="filters.city" @change="applyFilters" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
+        <select v-model="filters.city" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
           <option value="">全部縣市</option>
           <option v-for="city in cityOptions" :key="city" :value="city">{{ city }}</option>
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium mb-1 filter-label">產品品項</label>
-        <input v-model="filters.product" @input="applyFilters" type="text" placeholder="關鍵字" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm" />
+        <label class="block text-xs font-medium mb-1 filter-label">產品品項關鍵字</label>
+        <input
+          v-model="filters.product"
+          type="text"
+          placeholder="輸入關鍵字，名稱包含即符合（例：奶茶）"
+          class="w-full px-2 py-1.5 rounded-lg filter-input text-sm"
+        />
       </div>
       <div>
         <label class="block text-xs font-medium mb-1 filter-label">製造機台</label>
-        <select v-model="filters.machine" @change="applyFilters" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
+        <select v-model="filters.machine" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
           <option value="">全部機台</option>
           <option value="P#15">P#15</option>
           <option value="P#13">P#13</option>
@@ -23,36 +28,28 @@
       </div>
       <div>
         <label class="block text-xs font-medium mb-1 filter-label">購買通路</label>
-        <select v-model="filters.channel" @change="applyFilters" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
+        <select v-model="filters.channel" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
           <option value="">全部通路</option>
-          <option value="7-11">7-11</option>
-          <option value="萊爾富">萊爾富</option>
-          <option value="全家">全家</option>
-          <option value="OK">OK</option>
-          <option value="家樂福">家樂福</option>
-          <option value="全聯">全聯</option>
-          <option value="大潤發">大潤發</option>
-          <option value="網購平台">網購平台</option>
-          <option value="其他">其他</option>
+          <option v-for="ch in channelOptions" :key="ch" :value="ch">{{ ch }}</option>
         </select>
       </div>
       <div>
         <label class="block text-xs font-medium mb-1 filter-label">距離有效期限</label>
-        <select v-model="filters.status" @change="applyFilters" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
+        <select v-model="filters.status" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm">
           <option value="">全部狀態</option>
-          <option v-for="month in 13" :key="month-1" :value="month-1">{{ month-1 }}月</option>
+          <option v-for="month in 13" :key="month - 1" :value="month - 1">{{ month - 1 }}月</option>
         </select>
       </div>
       <div>
         <label class="block text-xs font-medium mb-1 filter-label">開始日期</label>
-        <input v-model="filters.startDate" @change="applyFilters" type="date" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm" />
+        <input v-model="filters.startDate" type="date" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm" />
       </div>
       <div>
         <label class="block text-xs font-medium mb-1 filter-label">結束日期</label>
-        <input v-model="filters.endDate" @change="applyFilters" type="date" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm" />
+        <input v-model="filters.endDate" type="date" class="w-full px-2 py-1.5 rounded-lg filter-input text-sm" />
       </div>
       <div class="col-span-2 sm:col-span-3 lg:col-span-4 flex gap-2 pt-2">
-        <button type="button" @click="clearFilters" class="px-4 py-2 text-sm font-medium rounded-lg btn-clear">清除篩選</button>
+        <button type="button" class="px-4 py-2 text-sm font-medium rounded-lg btn-clear" @click="clearFilters">清除篩選</button>
         <button type="submit" class="px-4 py-2 text-sm font-medium rounded-lg btn-submit">搜尋</button>
       </div>
     </form>
@@ -60,9 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 
-interface SearchFilters {
+export interface SearchFiltersPayload {
   city?: string
   product?: string
   machine?: string
@@ -72,12 +69,15 @@ interface SearchFilters {
   endDate?: string
 }
 
+const props = withDefaults(
+  defineProps<{ initialFilters?: Record<string, string>; modalOpen?: boolean }>(),
+  { initialFilters: () => ({}), modalOpen: false }
+)
 const emit = defineEmits<{
-  search: [filters: SearchFilters]
+  search: [filters: SearchFiltersPayload]
 }>()
 
-// 篩選條件
-const filters = ref<SearchFilters>({
+const filters = ref<SearchFiltersPayload>({
   city: '',
   product: '',
   machine: '',
@@ -87,22 +87,38 @@ const filters = ref<SearchFilters>({
   endDate: ''
 })
 
-// 縣市選項
-const cityOptions = ref([
+function applyInitialFilters() {
+  const init = props.initialFilters || {}
+  filters.value = {
+    city: init.city ?? '',
+    product: init.product ?? '',
+    machine: init.machine ?? '',
+    channel: init.channel ?? '',
+    status: init.status ?? '',
+    startDate: init.startDate ?? '',
+    endDate: init.endDate ?? ''
+  }
+}
+
+watch(() => [props.modalOpen, props.initialFilters], () => {
+  if (props.modalOpen) applyInitialFilters()
+}, { immediate: true, deep: true })
+
+const cityOptions = [
   '台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市',
   '基隆市', '新竹市', '嘉義市',
   '新竹縣', '苗栗縣', '彰化縣', '南投縣', '雲林縣', '嘉義縣',
   '屏東縣', '台東縣', '花蓮縣', '宜蘭縣',
   '澎湖縣', '金門縣', '連江縣'
-])
+]
 
-// 應用篩選
-const applyFilters = () => {
+const channelOptions = ['7-11', '萊爾富', '全家', 'OK', '家樂福', '全聯', '大潤發', '網購平台', '其他']
+
+function applyFilters() {
   emit('search', { ...filters.value })
 }
 
-// 清除篩選
-const clearFilters = () => {
+function clearFilters() {
   filters.value = {
     city: '',
     product: '',
@@ -115,12 +131,9 @@ const clearFilters = () => {
   applyFilters()
 }
 
-// 處理搜尋
-const handleSearch = () => {
+function handleSearch() {
   applyFilters()
 }
-
-onMounted(() => {})
 </script>
 
 <style scoped>
@@ -147,4 +160,3 @@ onMounted(() => {})
 }
 .btn-submit:hover { opacity: 0.9; }
 </style>
-
