@@ -1,26 +1,35 @@
 <template>
   <div class="space-y-4">
-    <div class="border-2 border-dashed rounded-lg p-6 text-center upload-zone">
-      <svg class="mx-auto h-12 w-12 upload-icon" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+    <div
+      class="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors min-h-[160px] flex flex-col items-center justify-center"
+      :class="[
+        isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400',
+        uploading ? 'opacity-50 cursor-not-allowed' : ''
+      ]"
+      @click.stop.prevent="triggerFileInput"
+      @mousedown.stop
+      @dragover.prevent="onDragover"
+      @dragleave.prevent="isDragging = false"
+      @drop.prevent="handleDrop"
+    >
+      <input
+        ref="fileInput"
+        type="file"
+        accept=".xlsx,.xls"
+        class="hidden"
+        @click.stop
+        @change="handleFileChange"
+      />
+      <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
       <div class="mt-4">
-        <label for="file-upload" class="cursor-pointer">
-          <span class="mt-2 block text-sm font-medium upload-label">
-            選擇 Excel 檔案
-          </span>
-          <span class="mt-1 block text-xs upload-hint">
-            支援 .xlsx、.xls（品二課客訴統整.xlsx 等）
-          </span>
-        </label>
-        <input
-          id="file-upload"
-          ref="fileInput"
-          type="file"
-          accept=".xlsx,.xls"
-          class="sr-only"
-          @change="handleFileChange"
-        />
+        <span class="block text-sm font-medium text-gray-900">
+          拖曳檔案至此 或 點擊上傳
+        </span>
+        <span class="mt-1 block text-xs text-gray-500">
+          支援 .xlsx、.xls
+        </span>
       </div>
     </div>
 
@@ -93,14 +102,38 @@ const fileInput = ref<HTMLInputElement>()
 const selectedFile = ref<File | null>(null)
 const uploading = ref(false)
 const result = ref<ImportResult | null>(null)
+const isDragging = ref(false)
 
 const emit = defineEmits<{
   'upload-success': [data: { message: string; added?: number; skipped?: number }]
   'upload-error': [error: string]
 }>()
 
-function handleFileChange(event: Event) {
-  const target = event.target as HTMLInputElement
+function triggerFileInput() {
+  if (uploading.value) return
+  fileInput.value?.click()
+}
+
+function onDragover(e: DragEvent) {
+  e.preventDefault()
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'
+  isDragging.value = true
+}
+
+function handleDrop(e: DragEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+  isDragging.value = false
+  const files = e.dataTransfer?.files
+  if (files?.length) {
+    selectedFile.value = files[0]
+    result.value = null
+    if (fileInput.value) fileInput.value.value = ''
+  }
+}
+
+function handleFileChange(e: Event) {
+  const target = e.target as HTMLInputElement
   if (target.files?.length) {
     selectedFile.value = target.files[0]
     result.value = null
@@ -167,10 +200,6 @@ async function uploadFile() {
 </script>
 
 <style scoped>
-.upload-zone { border-color: var(--color-border); }
-.upload-icon { color: var(--color-text-muted); }
-.upload-label { color: var(--color-text); }
-.upload-hint { color: var(--color-text-muted); }
 .file-preview { background-color: var(--color-bg-elevated); }
 .result-box { background-color: var(--color-bg-elevated); border: 1px solid var(--color-border); }
 .result-title { color: var(--color-text); }

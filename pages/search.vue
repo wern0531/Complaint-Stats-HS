@@ -75,8 +75,8 @@
 
     <div v-if="showUploadModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
       <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="showUploadModal = false" />
-        <div class="inline-block align-bottom rounded-xl text-left overflow-hidden shadow-xl sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full card">
+        <div class="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity" aria-hidden="true" @click="showUploadModal = false" />
+        <div class="relative z-50 inline-block align-bottom rounded-xl text-left overflow-hidden shadow-xl sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full card" @click.stop>
           <div class="px-6 py-4 border-b card-border flex justify-between items-center">
             <h3 class="text-lg font-medium page-title">Excel 檔案上傳</h3>
             <button type="button" @click="showUploadModal = false" class="p-1 rounded hover:opacity-80 page-subtitle"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>

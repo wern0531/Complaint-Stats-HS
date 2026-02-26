@@ -15,9 +15,9 @@
           @click="close"
         />
 
-        <!-- Modal 內容：圓角、陰影、標題列分隔線 -->
+        <!-- Modal 內容：圓角、陰影、標題列分隔線，relative z-10 確保在 backdrop 之上 -->
         <div
-          class="modal-content inline-block align-bottom rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full"
+          class="modal-content relative z-10 inline-block align-bottom rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:w-full"
           :class="contentMaxWidth"
           @click.stop
         >
