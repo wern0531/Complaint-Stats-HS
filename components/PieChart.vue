@@ -1,13 +1,5 @@
 <template>
-  <div
-    class="chart-wrapper cursor-pointer transition-shadow duration-200 hover:shadow-lg rounded-lg"
-    role="button"
-    tabindex="0"
-    aria-label="點擊放大圖表"
-    @click="$emit('enlarge')"
-    @keydown.enter="$emit('enlarge')"
-    @keydown.space.prevent="$emit('enlarge')"
-  >
+  <div class="chart-wrapper">
     <div class="chart-container">
       <canvas ref="chartCanvas"></canvas>
     </div>
@@ -37,8 +29,6 @@ interface Props {
   title?: string
   height?: string
 }
-
-defineEmits<{ enlarge: [] }>()
 
 const props = withDefaults(defineProps<Props>(), {
   title: '統計圖表',

@@ -62,7 +62,10 @@
         </div>
 
         <!-- 趨勢：近 12 個月 -->
-        <section class="card p-5 lg:p-6 mb-6">
+        <section
+          class="card p-5 lg:p-6 mb-6 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
+          @click="openChartModal('line', monthlyChartData, '每月客訴數量趨勢（近 12 個月）', '依反映時間統計')"
+        >
           <h2 class="text-lg font-semibold page-title mb-1">每月客訴數量趨勢（近 12 個月）</h2>
           <p class="text-sm page-subtitle mb-4">依反映時間統計</p>
           <div class="h-[280px]">
@@ -71,51 +74,58 @@
               title=""
               subtitle=""
               height="280px"
-              @enlarge="openChartModal('line', monthlyChartData, '每月客訴數量趨勢（近 12 個月）', '依反映時間統計')"
             />
           </div>
         </section>
 
         <!-- 類別分布：橫向長條 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div class="card p-5">
+          <div
+            class="card p-5 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
+            @click="openChartModal('horizontalBar', channelBarData, '購買通路分布')"
+          >
             <h3 class="text-base font-semibold page-title mb-4">購買通路分布</h3>
             <HorizontalBarChart
               :data="channelBarData"
               title=""
               height="260px"
-              @enlarge="openChartModal('horizontalBar', channelBarData, '購買通路分布')"
             />
           </div>
-          <div class="card p-5">
+          <div
+            class="card p-5 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
+            @click="openChartModal('horizontalBar', statusBarData, '產品狀態分布')"
+          >
             <h3 class="text-base font-semibold page-title mb-4">產品狀態分布</h3>
             <HorizontalBarChart
               :data="statusBarData"
               title=""
               height="260px"
-              @enlarge="openChartModal('horizontalBar', statusBarData, '產品狀態分布')"
             />
           </div>
         </div>
 
         <!-- 縣市 / 機台：直條圖 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div class="card p-5">
+          <div
+            class="card p-5 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
+            @click="openChartModal('bar', cityChartData, '縣市客訴統計')"
+          >
             <h3 class="text-base font-semibold page-title mb-4">縣市客訴統計</h3>
             <BarChart
               :data="cityChartData"
               title=""
               height="260px"
-              @enlarge="openChartModal('bar', cityChartData, '縣市客訴統計')"
             />
           </div>
-          <div class="card p-5">
+          <div
+            class="card p-5 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
+            @click="openChartModal('bar', productChartData, '產品客訴統計')"
+          >
             <h3 class="text-base font-semibold page-title mb-4">產品客訴統計</h3>
             <BarChart
               :data="productChartData"
               title=""
               height="260px"
-              @enlarge="openChartModal('bar', productChartData, '產品客訴統計')"
             />
           </div>
         </div>

@@ -72,10 +72,11 @@
       </div>
     </div>
 
-    <!-- 趨勢圖：flex-1 佔滿剩餘空間 -->
+    <!-- 趨勢圖：flex-1 佔滿剩餘空間，整張卡片可點擊放大 -->
     <section
-      class="rounded-xl border shadow-sm flex flex-col flex-1 min-h-0 px-4 py-3"
+      class="rounded-xl border shadow-sm flex flex-col flex-1 min-h-0 px-4 py-3 cursor-pointer transition-shadow hover:shadow-lg active:opacity-95"
       style="background-color: var(--color-card); border-color: var(--color-border);"
+      @click="openChartModal"
     >
       <div class="flex items-center justify-between gap-2 mb-2 shrink-0">
         <div>
@@ -103,7 +104,6 @@
           subtitle=""
           class="flex-1 min-h-0"
           style="height: 100%;"
-          @enlarge="openChartModal"
         />
       </div>
       <div
@@ -141,12 +141,9 @@ const statsData = ref<{
   monthlyStats?: Array<{ month: string; count: number }>
 }>({})
 
-const monthlyChartData = computed(() => {
-  if (!statsData.value?.monthlyStats?.length) {
-    return { labels: [] as string[], datasets: [] as unknown[] }
-  }
-  return transformMonthlyStatsToLineChart(statsData.value.monthlyStats)
-})
+const monthlyChartData = computed(() =>
+  transformMonthlyStatsToLineChart(statsData.value?.monthlyStats ?? [])
+)
 
 const last12Total = computed(() => {
   const m = statsData.value?.monthlyStats

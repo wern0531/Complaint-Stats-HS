@@ -50,15 +50,20 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td max-w-[200px] truncate">{{ complaint.productItem }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td">{{ complaint.manufacturingMachine }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm table-td">{{ complaint.city }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td">{{ formatReactionTime(complaint.reactionTime) }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td max-w-[200px] truncate">{{ complaint.consumerReactionPoint }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm table-td max-w-[200px] truncate">{{ complaint.causeAnalysis || '未分析' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium table-td">
               <div class="flex items-center gap-2">
-                <button type="button" @click="$emit('view-detail', complaint)" class="link-primary">查看詳情</button>
-                <button type="button" class="table-action-btn" aria-label="編輯" @click="$emit('edit', complaint)">✏️</button>
-                <button type="button" class="table-action-btn table-action-btn--danger" aria-label="刪除" @click="$emit('delete', complaint._id ?? complaint.id ?? '')">🗑️</button>
+                <button type="button" class="table-action-btn" aria-label="查看詳情" @click="$emit('view-detail', complaint)" title="查看詳情">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </button>
+                <button type="button" class="table-action-btn" aria-label="編輯" @click="$emit('edit', complaint)" title="編輯">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                </button>
+                <button type="button" class="table-action-btn table-action-btn--danger" aria-label="刪除" @click="$emit('delete', complaint._id ?? complaint.id ?? '')" title="刪除">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
               </div>
             </td>
           </tr>
@@ -96,7 +101,6 @@ const sortableColumns = [
   { field: 'complaintNumber', label: '客訴編號', sortable: true },
   { field: 'productItem', label: '產品品項', sortable: true },
   { field: 'manufacturingMachine', label: '製造機台', sortable: true },
-  { field: 'city', label: '縣市', sortable: true },
   { field: 'reactionTime', label: '日期', sortable: true }
 ]
 

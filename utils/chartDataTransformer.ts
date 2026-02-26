@@ -107,13 +107,31 @@ export const transformMonthlyStatsToBarChart = (monthlyStats: Array<{ month: str
   return transformToBarChartData(monthlyStats, 'month', '月份客訴統計')
 }
 
-// 月份統計轉換為折線圖（近 12 個月趨勢）
+// 月份統計轉換為折線圖（固定近 12 個月，含本月；無資料月份補 0）
 export const transformMonthlyStatsToLineChart = (monthlyStats: Array<{ month: string; count: number }>) => {
-  const labels = monthlyStats.map(item => {
-    const [y, m] = item.month.split('-')
-    return `${parseInt(m)}月`
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() // 0-based
+
+  // 產生「包含本月的近 12 個月」的 YYYY-MM 陣列（由舊到新）
+  const months: string[] = []
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(year, month - i, 1)
+    const y = d.getFullYear()
+    const m = d.getMonth() + 1
+    months.push(`${y}-${String(m).padStart(2, '0')}`)
+  }
+
+  const statsMap = Object.fromEntries(
+    (monthlyStats || []).map(item => [item.month, item.count])
+  )
+
+  const labels = months.map(ym => {
+    const [y, m] = ym.split('-')
+    return `${y}/${m}`
   })
-  const data = monthlyStats.map(item => item.count)
+  const data = months.map(ym => statsMap[ym] ?? 0)
+
   return {
     labels,
     datasets: [{
