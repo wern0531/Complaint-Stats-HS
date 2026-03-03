@@ -1,4 +1,5 @@
 import { getFirebaseAdmin } from '~/server/utils/firebase'
+import { clearRequestCache } from '~/server/utils/requestCache'
 
 const COMPLAINTS_COLLECTION = 'complaints'
 
@@ -20,6 +21,7 @@ export default defineEventHandler(async (event) => {
     }
 
     await docRef.delete()
+    clearRequestCache()
 
     return {
       success: true,

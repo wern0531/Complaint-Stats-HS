@@ -1,10 +1,11 @@
 /**
  * Excel 匯入 API
- * - 使用 import * as XLSX from 'xlsx-fixed' 以配合 Nuxt alias，避免 Windows 路徑問題
+ * - 使用動態 import('xlsx-fixed') 避免載入失敗時無回應；alias 配合 Nuxt 解決 Windows 路徑問題
  * - 解析所有工作表，依客訴編號去重，略過摘要列與右側統計表
  */
-import * as XLSX from 'xlsx-fixed'
 import { getFirebaseAdmin } from '~/server/utils/firebase'
+import { updateStatsIncrementally } from '~/server/utils/statsHelper'
+import { clearRequestCache } from '~/server/utils/requestCache'
 import admin from 'firebase-admin'
 
 const COMPLAINTS_COLLECTION = 'complaints'
@@ -48,12 +49,21 @@ function toComplaintField(header: string): string | null {
   return null
 }
 
-/** 8 位數整數 (20240115) 或字串 → YYYYMMDD 字串，供 Firestore 與前端一致 */
+/** 8 位數整數 (20240115)、Excel 序列日期、或字串 → YYYYMMDD 字串，供 Firestore 與前端一致 */
 function parseDateToYmd(value: unknown): string {
   if (value == null) return ''
   if (typeof value === 'number') {
     const n = Math.floor(value)
+    // 8 位數 YYYYMMDD 格式
     if (n >= 19000101 && n <= 21001231) return String(n)
+    // Excel 序列日期（約 1954–2064 年對應 20000–60000）
+    if (n >= 20000 && n <= 60000) {
+      const date = new Date(Math.round((n - 25569) * 86400 * 1000))
+      const y = date.getFullYear()
+      const m = date.getMonth() + 1
+      const d = date.getDate()
+      return `${y}${String(m).padStart(2, '0')}${String(d).padStart(2, '0')}`
+    }
     return String(n)
   }
   if (typeof value === 'string') {
@@ -125,29 +135,53 @@ function rowToDoc(
 function buildColMap(headerRow: Record<string, unknown>): Record<string, string> {
   const colMap: Record<string, string> = {}
   for (const key of Object.keys(headerRow)) {
-    const field = toComplaintField(String(headerRow[key] ?? ''))
+    // 使用 key（表頭名稱，如「有效日期」），不要用 headerRow[key]（儲存格值，如 "20240101"）
+    const field = toComplaintField(key)
     if (field) colMap[field] = key
   }
   return colMap
 }
 
 /** 取得 sheet 的列資料：第一列為表頭，其餘為資料列（key 為表頭字串） */
-function getSheetRows(sheet: XLSX.WorkSheet): Record<string, unknown>[] {
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+function getSheetRows(XLSX: { utils: { sheet_to_json: (s: unknown, o?: object) => Record<string, unknown>[] } }, sheet: unknown): Record<string, unknown>[] {
+  return XLSX.utils.sheet_to_json(sheet as never, {
     raw: false,
     defval: '',
     blankrows: false
   })
-  return rows
+}
+
+function fail(event: import('h3').H3Event, status: number, message: string, errors: string[] = []) {
+  setResponseStatus(event, status)
+  setHeader(event, 'Content-Type', 'application/json; charset=utf-8')
+  return { success: false, message, added: 0, skipped: 0, errors: errors.length ? errors : [message] }
 }
 
 export default defineEventHandler(async (event) => {
   try {
-    const form = await readMultipartFormData(event)
+    let form: Awaited<ReturnType<typeof readMultipartFormData>>
+    try {
+      form = await readMultipartFormData(event)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      console.error('readMultipartFormData error:', msg)
+      return fail(event, 400, '無法解析上傳資料，請確認檔案大小與格式', [msg])
+    }
+
     const file = form?.find((f) => f.name === 'file')
     if (!file?.data) {
-      setResponseStatus(event, 400)
-      return { success: false, message: '未收到檔案', added: 0, skipped: 0, errors: [] }
+      return fail(event, 400, '未收到檔案', [])
+    }
+
+    let XLSX: { read: (data: Buffer | ArrayBuffer, opts: { type: string; cellDates: boolean }) => { SheetNames: string[]; Sheets: Record<string, unknown> }; utils: { sheet_to_json: (s: unknown, o?: object) => Record<string, unknown>[] } }
+    try {
+      const mod = await import('xlsx-fixed')
+      XLSX = (mod?.default ?? mod) as typeof XLSX
+      if (!XLSX?.read || !XLSX?.utils?.sheet_to_json) throw new Error('xlsx 模組 API 不完整')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      console.error('xlsx-fixed load error:', msg)
+      return fail(event, 500, 'Excel 解析模組載入失敗', [msg])
     }
 
     const workbook = XLSX.read(file.data, { type: 'buffer', cellDates: false })
@@ -160,7 +194,7 @@ export default defineEventHandler(async (event) => {
       const sheet = workbook.Sheets[sheetName]
       if (!sheet) continue
 
-      const rows = getSheetRows(sheet)
+      const rows = getSheetRows(XLSX, sheet)
       if (rows.length < 1) continue
 
       const firstRow = rows[0] as Record<string, unknown>
@@ -208,6 +242,12 @@ export default defineEventHandler(async (event) => {
       added += slice.length
     }
 
+    const allNewComplaints = toInsert.map(({ doc }) => doc)
+    if (allNewComplaints.length > 0) {
+      await updateStatsIncrementally(db, allNewComplaints)
+    }
+    clearRequestCache()
+
     return {
       success: true,
       message: `匯入完成：新增 ${added} 筆，略過（已存在）${skipped} 筆`,
@@ -216,14 +256,16 @@ export default defineEventHandler(async (event) => {
       errors: undefined
     }
   } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
     console.error('Import error:', error)
     setResponseStatus(event, 500)
+    setHeader(event, 'Content-Type', 'application/json; charset=utf-8')
     return {
       success: false,
       message: '匯入失敗',
       added: 0,
       skipped: 0,
-      errors: [error instanceof Error ? error.message : String(error)]
+      errors: [msg]
     }
   }
 })

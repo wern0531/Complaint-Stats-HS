@@ -200,33 +200,20 @@ const topCity = computed(() => {
   return top ? `${top.city} (${top.count})` : '無'
 })
 
-/** 依 filters 組裝 /api/complaints/stats 的 query string（日期→yearMonth；其餘參數供 API 擴充用） */
+/** 依 filters 組裝 /api/complaints/stats 的 query（API 使用 startDate、endDate YYYY-MM-DD） */
 function buildStatsQuery(): string {
   const f = props.filters
   const params = new URLSearchParams()
 
-  // 日期範圍 → yearMonth（API 目前支援）
-  if (f?.startDate || f?.endDate) {
-    const start = f.startDate ? f.startDate.slice(0, 7) : ''
-    const end = f.endDate ? f.endDate.slice(0, 7) : ''
-    if (start && end) {
-      params.set('yearMonth', `${start}~${end}`)
-    } else if (start) {
-      params.set('yearMonth', start)
-    } else if (end) {
-      params.set('yearMonth', end)
-    }
-  }
-
-  // 其餘篩選（API 若支援可一併帶上）
+  if (f?.startDate?.trim()) params.set('startDate', f.startDate.trim())
+  if (f?.endDate?.trim()) params.set('endDate', f.endDate.trim())
   if (f?.city?.trim()) params.set('city', f.city.trim())
   if (f?.product?.trim()) params.set('product', f.product.trim())
   if (f?.machine?.trim()) params.set('machine', f.machine.trim())
   if (f?.channel?.trim()) params.set('channel', f.channel.trim())
   if (f?.status !== undefined && f?.status !== '') params.set('status', String(f.status))
 
-  const qs = params.toString()
-  return qs
+  return params.toString()
 }
 
 async function fetchCityStats() {

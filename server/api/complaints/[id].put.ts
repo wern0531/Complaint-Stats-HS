@@ -1,5 +1,6 @@
 import type { Complaint } from '~/types/complaint'
 import { getFirebaseAdmin } from '~/server/utils/firebase'
+import { clearRequestCache } from '~/server/utils/requestCache'
 import admin from 'firebase-admin'
 
 const COMPLAINTS_COLLECTION = 'complaints'
@@ -40,6 +41,7 @@ export default defineEventHandler(async (event) => {
     }
 
     await docRef.update(updateData)
+    clearRequestCache()
 
     return {
       success: true,

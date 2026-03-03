@@ -1,6 +1,11 @@
+/** 預設「全部區間」起訖，讓歷史匯入資料也能在圖表顯示 */
+const DEFAULT_START = '2000-01-01'
+const DEFAULT_END = '2030-12-31'
+
 /**
  * 客訴分析頁面用的全域篩選狀態與操作。
  * 用於 cross-filtering：縣市、產品、日期範圍等，並與 stats API 查詢參數對應。
+ * 預設為「全部區間」以顯示所有歷史資料（含匯入的舊資料）。
  */
 export interface ComplaintFilterState {
   city: string
@@ -9,6 +14,10 @@ export interface ComplaintFilterState {
   monthSingle: string
   monthStart: string
   monthEnd: string
+  /** 統計日期範圍起（YYYY-MM-DD） */
+  startDate: string
+  /** 統計日期範圍訖（YYYY-MM-DD） */
+  endDate: string
 }
 
 const defaultState: ComplaintFilterState = {
@@ -17,7 +26,9 @@ const defaultState: ComplaintFilterState = {
   period: 'all',
   monthSingle: '',
   monthStart: '',
-  monthEnd: ''
+  monthEnd: '',
+  startDate: DEFAULT_START,
+  endDate: DEFAULT_END
 }
 
 export function useComplaintFilter() {
@@ -30,10 +41,16 @@ export function useComplaintFilter() {
     if (partial.monthSingle !== undefined) state.value.monthSingle = partial.monthSingle
     if (partial.monthStart !== undefined) state.value.monthStart = partial.monthStart
     if (partial.monthEnd !== undefined) state.value.monthEnd = partial.monthEnd
+    if (partial.startDate !== undefined) state.value.startDate = partial.startDate
+    if (partial.endDate !== undefined) state.value.endDate = partial.endDate
   }
 
   function clearFilter() {
-    state.value = { ...defaultState }
+    state.value = {
+      ...defaultState,
+      startDate: DEFAULT_START,
+      endDate: DEFAULT_END
+    }
   }
 
   /** 是否有任一篩選被設定 */
@@ -47,10 +64,13 @@ export function useComplaintFilter() {
     )
   })
 
-  /** 用於 API 的 query 參數（stats.get 使用的 month, city, product） */
+  /** 用於 API 的 query 參數（stats.get 使用 startDate, endDate；可選 city, product） */
   const apiParams = computed(() => {
     const s = state.value
-    const params: Record<string, string> = {}
+    const params: Record<string, string> = {
+      startDate: s.startDate || DEFAULT_START,
+      endDate: s.endDate || DEFAULT_END
+    }
     if (s.city) params.city = s.city
     if (s.product) params.product = s.product
     if (s.period === 'single' && s.monthSingle !== '') params.month = s.monthSingle

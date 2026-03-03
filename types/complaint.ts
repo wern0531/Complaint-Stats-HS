@@ -96,7 +96,29 @@ export interface KeywordStats {
   keywords: KeywordItem[]
 }
 
-// 客訴統計數據（含進階分析）
+/** 單月預先彙總的統計桶（Write-Time Aggregation 儲存格式） */
+export interface MonthlyBucket {
+  count: number
+  city: Record<string, number>
+  product: Record<string, number>
+  /** 製造機台 -> 產品 -> 筆數 */
+  productByMachine: Record<string, Record<string, number>>
+  machine: Record<string, number>
+  channel: Record<string, number>
+  status: Record<string, number>
+  cause: Record<string, number>
+  shelfLife: Record<string, number>
+  keywords: Record<string, number>
+}
+
+/** 統計儀表板文件：statistics/dashboard */
+export interface DashboardData {
+  lastUpdated: string
+  /** Key 格式 "YYYY-MM" */
+  buckets: Record<string, MonthlyBucket>
+}
+
+// 客訴統計數據（含進階分析，API 回傳格式與現有相容）
 export interface ComplaintStats {
   total: number
   cityStats: Array<{ city: string; count: number }>

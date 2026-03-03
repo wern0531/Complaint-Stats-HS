@@ -1,6 +1,8 @@
 import type { Complaint } from '~/types/complaint'
 import { getFirebaseAdmin } from '~/server/utils/firebase'
 import { complaintAddSchema } from '~/server/utils/complaintSchema'
+import { updateStatsIncrementally } from '~/server/utils/statsHelper'
+import { clearRequestCache } from '~/server/utils/requestCache'
 import admin from 'firebase-admin'
 
 const COMPLAINTS_COLLECTION = 'complaints'
@@ -69,6 +71,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const ref = await db.collection(COMPLAINTS_COLLECTION).add(docData)
+
+    await updateStatsIncrementally(db, [docData])
+    clearRequestCache()
 
     const newComplaint: Complaint = {
       _id: ref.id,

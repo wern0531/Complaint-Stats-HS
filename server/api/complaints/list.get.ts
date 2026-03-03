@@ -1,10 +1,23 @@
 import type { Complaint, ComplaintFilter } from '~/types/complaint'
 import { getFirebaseAdmin } from '~/server/utils/firebase'
 import { toIsoString, toReactionTimeString, toNumberOrString } from '~/server/utils/firestore-helpers'
+import { getCache, setCache } from '~/server/utils/requestCache'
 import type { Query } from 'firebase-admin/firestore'
 
 const COMPLAINTS_COLLECTION = 'complaints'
-const MAX_FIRESTORE_READ = 3000
+/** 單次查詢上限，控制每日 Firestore 讀取（免費約 5 萬/天） */
+const MAX_FIRESTORE_READ = 1000
+
+/** 依篩選參數產生快取 key（不含 page/limit，同一篩選的任意分頁可共用快取） */
+function listCacheKey(q: Record<string, unknown>): string {
+  const parts: string[] = []
+  const keys = ['month', 'city', 'product', 'machine', 'channel', 'status', 'startDate', 'endDate', 'sortBy', 'sortOrder']
+  for (const k of keys) {
+    const v = q[k]
+    if (v != null && String(v).trim() !== '') parts.push(`${k}=${String(v).trim()}`)
+  }
+  return `list:${parts.sort().join('&')}`
+}
 
 /** 前端送「台中市」、Firestore 存「台中」，查詢時統一成簡稱 */
 function normalizeCityForQuery(city: string): string {
@@ -47,6 +60,27 @@ function docToComplaint(id: string, data: Record<string, unknown>): Complaint {
 export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event)
+    const cacheKey = listCacheKey(query as Record<string, unknown>)
+    const page = parseInt((query.page as string) || '1', 10)
+    const limit = parseInt((query.limit as string) || '100', 10)
+
+    const cached = getCache<{ filteredComplaints: Complaint[]; total: number }>(cacheKey)
+    if (cached) {
+      const startIndex = (page - 1) * limit
+      const paginatedComplaints = cached.filteredComplaints.slice(startIndex, startIndex + limit)
+      return {
+        success: true,
+        message: '獲取客訴資料成功',
+        data: {
+          complaints: paginatedComplaints,
+          total: cached.total,
+          page,
+          limit,
+          totalPages: Math.ceil(cached.total / limit)
+        }
+      }
+    }
+
     const { db } = getFirebaseAdmin(event)
 
     const filters: ComplaintFilter = {
@@ -145,20 +179,21 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const page = parseInt((query.page as string) || '1', 10)
-    const limit = parseInt((query.limit as string) || '100', 10)
     const startIndex = (page - 1) * limit
     const paginatedComplaints = filteredComplaints.slice(startIndex, startIndex + limit)
+    const total = filteredComplaints.length
+
+    setCache(cacheKey, { filteredComplaints, total })
 
     return {
       success: true,
       message: '獲取客訴資料成功',
       data: {
         complaints: paginatedComplaints,
-        total: filteredComplaints.length,
+        total,
         page,
         limit,
-        totalPages: Math.ceil(filteredComplaints.length / limit)
+        totalPages: Math.ceil(total / limit)
       }
     }
   } catch (error) {
